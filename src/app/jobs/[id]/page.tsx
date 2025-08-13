@@ -1,26 +1,25 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { 
-  ArrowLeft, 
-  MapPin, 
-  Clock, 
-  DollarSign, 
-  Building2, 
-  Calendar,
-  Users,
-  CheckCircle,
-  AlertCircle,
-  Share2,
-  Bookmark
-} from "lucide-react";
-import { formatSalaryRange, formatRelativeTime, formatDate } from "@/lib/utils";
+import { mockDepartments, mockHeadquarters, mockJobs } from "@/data/mock-jobs";
 import type { JobPosting } from "@/lib/api";
-import { mockJobs, mockHeadquarters, mockDepartments } from "@/data/mock-jobs";
+import { formatDate, formatRelativeTime, formatSalaryRange } from "@/lib/utils";
+import {
+  AlertCircle,
+  ArrowLeft,
+  Bookmark,
+  Building2,
+  Calendar,
+  Clock,
+  DollarSign,
+  MapPin,
+  Share2,
+  Users
+} from "lucide-react";
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function JobDetailPage() {
   const params = useParams();

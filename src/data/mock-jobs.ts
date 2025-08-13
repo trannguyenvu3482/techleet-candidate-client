@@ -196,18 +196,93 @@ export const mockJobs: JobPosting[] = [
 
 // Mock company data for filters
 export const mockDepartments = [
-  { departmentId: 1, departmentName: "Engineering", departmentCode: "ENG", isActive: true },
-  { departmentId: 2, departmentName: "DevOps", departmentCode: "DEVOPS", isActive: true },
-  { departmentId: 3, departmentName: "Quality Assurance", departmentCode: "QA", isActive: true },
-  { departmentId: 4, departmentName: "Data Science", departmentCode: "DS", isActive: true },
-  { departmentId: 5, departmentName: "Mobile Development", departmentCode: "MOBILE", isActive: true },
-  { departmentId: 6, departmentName: "Product & Design", departmentCode: "PRODUCT", isActive: true },
+  {
+    departmentId: 1,
+    departmentName: "Engineering",
+    description: "Software development and engineering teams",
+    departmentCode: "ENG",
+    headquarterId: 1,
+    isActive: true
+  },
+  {
+    departmentId: 2,
+    departmentName: "DevOps",
+    description: "Infrastructure and deployment operations",
+    departmentCode: "DEVOPS",
+    headquarterId: 1,
+    isActive: true
+  },
+  {
+    departmentId: 3,
+    departmentName: "Quality Assurance",
+    description: "Software testing and quality control",
+    departmentCode: "QA",
+    headquarterId: 1,
+    isActive: true
+  },
+  {
+    departmentId: 4,
+    departmentName: "Data Science",
+    description: "Data analysis and machine learning",
+    departmentCode: "DS",
+    headquarterId: 2,
+    isActive: true
+  },
+  {
+    departmentId: 5,
+    departmentName: "Mobile Development",
+    description: "iOS and Android application development",
+    departmentCode: "MOBILE",
+    headquarterId: 2,
+    isActive: true
+  },
+  {
+    departmentId: 6,
+    departmentName: "Product & Design",
+    description: "Product management and UX/UI design",
+    departmentCode: "PRODUCT",
+    headquarterId: 3,
+    isActive: true
+  },
 ];
 
 export const mockHeadquarters = [
-  { headquarterId: 1, headquarterName: "TechLeet HQ", city: "Hồ Chí Minh", isActive: true },
-  { headquarterId: 2, headquarterName: "TechLeet Hanoi", city: "Hà Nội", isActive: true },
-  { headquarterId: 3, headquarterName: "TechLeet Da Nang", city: "Đà Nẵng", isActive: true },
+  {
+    headquarterId: 1,
+    headquarterName: "TechLeet HQ",
+    headquarterAddress: "123 Nguyễn Huệ, Quận 1, Thành phố Hồ Chí Minh",
+    headquarterPhone: "+84 28 1234 5678",
+    headquarterEmail: "hcm@techleet.vn",
+    city: "Hồ Chí Minh",
+    postalCode: "700000",
+    description: "Main headquarters with all departments",
+    isMainHeadquarter: true,
+    isActive: true
+  },
+  {
+    headquarterId: 2,
+    headquarterName: "TechLeet Hanoi",
+    headquarterAddress: "456 Hoàn Kiếm, Quận Hoàn Kiếm, Hà Nội",
+    headquarterPhone: "+84 24 1234 5678",
+    headquarterEmail: "hanoi@techleet.vn",
+    city: "Hà Nội",
+    postalCode: "100000",
+    description: "Northern branch office",
+    isMainHeadquarter: false,
+    isActive: true
+  },
+  {
+    headquarterId: 3,
+    headquarterName: "TechLeet Da Nang",
+    headquarterAddress: "789 Hàn Thuyên, Quận Hải Châu, Đà Nẵng",
+    headquarterPhone: "+84 236 1234 567",
+    headquarterEmail: "danang@techleet.vn",
+    city: "Đà Nẵng",
+    postalCode: "550000",
+    description: "Central Vietnam branch office",
+    isMainHeadquarter: false,
+    isActive: true
+  },
 ];
 
 // Helper function to simulate API delay
