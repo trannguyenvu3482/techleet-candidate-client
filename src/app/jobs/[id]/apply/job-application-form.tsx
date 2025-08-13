@@ -1,17 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useDropzone } from "react-dropzone";
-import * as z from "zod";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { BackButton } from "@/components/ui/back-button";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -21,21 +11,29 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { 
-  ArrowLeft, 
-  Upload, 
-  FileText, 
-  CheckCircle, 
-  AlertCircle,
+import { Input } from "@/components/ui/input";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { Textarea } from "@/components/ui/textarea";
+import { mockDepartments, mockHeadquarters } from "@/data/mock-jobs";
+import type { JobPosting } from "@/lib/api";
+import { formatSalaryRange } from "@/lib/utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  ArrowLeft,
   Building2,
-  MapPin,
-  DollarSign,
+  CheckCircle,
   Clock,
+  DollarSign,
+  FileText,
+  MapPin,
+  Upload,
   X
 } from "lucide-react";
-import { formatSalaryRange } from "@/lib/utils";
-import type { JobPosting } from "@/lib/api";
-import { mockDepartments, mockHeadquarters } from "@/data/mock-jobs";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useDropzone } from "react-dropzone";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 
 // Zod schema for form validation
 const applicationFormSchema = z.object({
@@ -70,7 +68,6 @@ interface JobApplicationFormProps {
 }
 
 export function JobApplicationForm({ job }: JobApplicationFormProps) {
-  const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);

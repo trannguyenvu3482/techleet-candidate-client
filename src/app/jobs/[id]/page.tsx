@@ -20,13 +20,14 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
 interface JobDetailPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export async function generateMetadata({ params }: JobDetailPageProps): Promise<Metadata> {
-  const slug = params.id;
+  const { id } = await params;
+  const slug = id;
 
   try {
     const job = await mockApi.getJobPostingBySlug(slug);
@@ -62,6 +63,7 @@ export async function generateMetadata({ params }: JobDetailPageProps): Promise<
       },
     };
   } catch (error) {
+    console.error('Error fetching job:', error);
     return {
       title: "Job Details | TechLeet Careers",
       description: "View job details and apply for positions at TechLeet.",
@@ -70,7 +72,8 @@ export async function generateMetadata({ params }: JobDetailPageProps): Promise<
 }
 
 export default async function JobDetailPage({ params }: JobDetailPageProps) {
-  const slug = params.id;
+  const { id } = await params;
+  const slug = id;
 
   let job: JobPosting | null = null;
   let error: string | null = null;

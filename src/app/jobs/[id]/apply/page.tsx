@@ -1,17 +1,18 @@
-import { mockApi, mockDepartments, mockHeadquarters } from "@/data/mock-jobs";
+import { mockApi, mockHeadquarters } from "@/data/mock-jobs";
 import type { JobPosting } from "@/lib/api";
-import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { JobApplicationForm } from "./job-application-form";
 
 interface JobApplicationPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export async function generateMetadata({ params }: JobApplicationPageProps): Promise<Metadata> {
-  const slug = params.id;
+  const { id } = await params;
+  const slug = id;
 
   try {
     const job = await mockApi.getJobPostingBySlug(slug);
@@ -44,6 +45,7 @@ export async function generateMetadata({ params }: JobApplicationPageProps): Pro
       },
     };
   } catch (error) {
+    console.error('Error fetching job:', error);
     return {
       title: "Job Application | TechLeet Careers",
       description: "Apply for a position at TechLeet.",
@@ -52,7 +54,8 @@ export async function generateMetadata({ params }: JobApplicationPageProps): Pro
 }
 
 export default async function JobApplicationPage({ params }: JobApplicationPageProps) {
-  const slug = params.id;
+  const { id } = await params;
+  const slug = id;
 
   let job: JobPosting | null = null;
 
