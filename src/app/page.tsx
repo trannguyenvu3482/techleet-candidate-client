@@ -1,30 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Building2, MapPin } from "lucide-react";
+import { ArrowRight, MapPin } from "lucide-react";
 import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="min-h-screen">
-      {/* Header */}
-      <header className="border-b bg-white">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Building2 className="h-8 w-8 text-blue-600" />
-            <span className="text-2xl font-bold text-gray-900">TechLeet</span>
-          </div>
-          <nav className="hidden md:flex items-center space-x-6">
-            <Link href="/jobs" className="text-gray-600 hover:text-gray-900">
-              Việc làm
-            </Link>
-            <Link href="/about" className="text-gray-600 hover:text-gray-900">
-              Về chúng tôi
-            </Link>
-            <Link href="/contact" className="text-gray-600 hover:text-gray-900">
-              Liên hệ
-            </Link>
-          </nav>
-        </div>
-      </header>
+    <div>
 
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-blue-50 to-indigo-100 py-20">
@@ -328,51 +308,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2">
-                <Building2 className="h-6 w-6" />
-                <span className="text-xl font-bold">TechLeet</span>
-              </div>
-              <p className="text-gray-400">
-                Công ty công nghệ hàng đầu Việt Nam, chuyên phát triển các giải pháp
-                số hóa doanh nghiệp.
-              </p>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4">Công ty</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li><Link href="/about" className="hover:text-white">Về chúng tôi</Link></li>
-                <li><Link href="/culture" className="hover:text-white">Văn hóa</Link></li>
-                <li><Link href="/news" className="hover:text-white">Tin tức</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4">Nghề nghiệp</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li><Link href="/jobs" className="hover:text-white">Việc làm</Link></li>
-                <li><Link href="/internship" className="hover:text-white">Thực tập</Link></li>
-                <li><Link href="/benefits" className="hover:text-white">Phúc lợi</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4">Liên hệ</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li>careers@techleet.com</li>
-                <li>+84-28-3822-1234</li>
-                <li>123 Nguyễn Huệ, Q1, TP.HCM</li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 TechLeet. Tất cả quyền được bảo lưu.</p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

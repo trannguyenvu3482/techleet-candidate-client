@@ -30,7 +30,7 @@ export interface JobPosting {
   experienceLevel: string;
   benefits: string;
   applicationDeadline: string;
-  status: 'draft' | 'active' | 'closed';
+  status: 'draft' | 'active' | 'closed' | "published";
   departmentId: number;
   positionId: number;
   headquarterId: number;
