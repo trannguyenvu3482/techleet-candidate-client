@@ -9,6 +9,18 @@ import {
   Heart,
   ArrowRight,
 } from "lucide-react";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "About Us | TechLeet",
+  description: "Learn about TechLeet - Vietnam's leading technology company. Our mission, values, and commitment to innovation and excellence.",
+  keywords: ["TechLeet", "about", "company", "mission", "values", "technology", "Vietnam"],
+  openGraph: {
+    title: "About Us | TechLeet",
+    description: "Learn about TechLeet - Vietnam's leading technology company. Our mission, values, and commitment to innovation and excellence.",
+    type: "website",
+  },
+};
 
 export default function AboutPage() {
   return (

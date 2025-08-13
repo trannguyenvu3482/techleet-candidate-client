@@ -1,9 +1,11 @@
 import type { JobPosting } from "@/lib/api";
+import { generateJobSlug } from "@/lib/utils";
 
 // Mock job data for development
 export const mockJobs: JobPosting[] = [
   {
     jobPostingId: 1,
+    slug: generateJobSlug("Senior Frontend Developer", 1),
     title: "Senior Frontend Developer",
     description: "Chúng tôi đang tìm kiếm một Senior Frontend Developer có kinh nghiệm với React, TypeScript và Next.js để tham gia đội ngũ phát triển sản phẩm. Bạn sẽ làm việc với các công nghệ hiện đại và tham gia xây dựng các ứng dụng web quy mô lớn.",
     requirements: "• 3+ năm kinh nghiệm với React và TypeScript\n• Kinh nghiệm với Next.js, Tailwind CSS\n• Hiểu biết về REST API và GraphQL\n• Kinh nghiệm với Git và CI/CD",
@@ -23,6 +25,7 @@ export const mockJobs: JobPosting[] = [
   },
   {
     jobPostingId: 2,
+    slug: generateJobSlug("Backend Developer (Node.js)", 2),
     title: "Backend Developer (Node.js)",
     description: "Tham gia phát triển hệ thống backend cho các ứng dụng web và mobile. Làm việc với Node.js, Express, PostgreSQL và các công nghệ cloud hiện đại.",
     requirements: "• 2+ năm kinh nghiệm với Node.js\n• Kinh nghiệm với PostgreSQL, MongoDB\n• Hiểu biết về microservices\n• Kinh nghiệm với Docker và AWS",
@@ -42,6 +45,7 @@ export const mockJobs: JobPosting[] = [
   },
   {
     jobPostingId: 3,
+    slug: generateJobSlug("DevOps Engineer", 3),
     title: "DevOps Engineer",
     description: "Quản lý và tối ưu hóa hạ tầng cloud, xây dựng CI/CD pipeline và đảm bảo tính ổn định của hệ thống. Làm việc với AWS, Docker, Kubernetes.",
     requirements: "• 3+ năm kinh nghiệm DevOps\n• Thành thạo AWS, Docker, Kubernetes\n• Kinh nghiệm với Terraform, Ansible\n• Hiểu biết về monitoring và logging",
@@ -61,6 +65,7 @@ export const mockJobs: JobPosting[] = [
   },
   {
     jobPostingId: 4,
+    slug: generateJobSlug("QA Engineer", 4),
     title: "QA Engineer",
     description: "Đảm bảo chất lượng sản phẩm thông qua việc thiết kế và thực hiện các test case, automation testing. Làm việc chặt chẽ với team development.",
     requirements: "• 2+ năm kinh nghiệm QA\n• Kinh nghiệm với automation testing\n• Hiểu biết về Selenium, Cypress\n• Kỹ năng phân tích và báo cáo bug",
@@ -80,6 +85,7 @@ export const mockJobs: JobPosting[] = [
   },
   {
     jobPostingId: 5,
+    slug: generateJobSlug("Data Scientist", 5),
     title: "Data Scientist",
     description: "Phân tích dữ liệu lớn, xây dựng mô hình machine learning và cung cấp insights cho business. Làm việc với Python, SQL, và các công cụ ML hiện đại.",
     requirements: "• Bằng cử nhân về Toán, Thống kê hoặc CS\n• Thành thạo Python, SQL, R\n• Kinh nghiệm với ML frameworks\n• Kỹ năng trực quan hóa dữ liệu",
@@ -99,6 +105,7 @@ export const mockJobs: JobPosting[] = [
   },
   {
     jobPostingId: 6,
+    slug: generateJobSlug("Mobile Developer (React Native)", 6),
     title: "Mobile Developer (React Native)",
     description: "Phát triển ứng dụng mobile cross-platform với React Native. Tối ưu hiệu suất và trải nghiệm người dùng trên cả iOS và Android.",
     requirements: "• 2+ năm kinh nghiệm React Native\n• Hiểu biết về iOS và Android\n• Kinh nghiệm với Redux, TypeScript\n• Đã publish app lên store",
@@ -118,6 +125,7 @@ export const mockJobs: JobPosting[] = [
   },
   {
     jobPostingId: 7,
+    slug: generateJobSlug("UI/UX Designer", 7),
     title: "UI/UX Designer",
     description: "Thiết kế giao diện và trải nghiệm người dùng cho các sản phẩm web và mobile. Làm việc chặt chẽ với team product và development.",
     requirements: "• 2+ năm kinh nghiệm UI/UX\n• Thành thạo Figma, Adobe Creative Suite\n• Hiểu biết về design system\n• Portfolio ấn tượng",
@@ -137,6 +145,7 @@ export const mockJobs: JobPosting[] = [
   },
   {
     jobPostingId: 8,
+    slug: generateJobSlug("Product Manager", 8),
     title: "Product Manager",
     description: "Quản lý sản phẩm từ ý tưởng đến triển khai. Làm việc với stakeholders, định nghĩa requirements và đảm bảo sản phẩm đáp ứng nhu cầu thị trường.",
     requirements: "• 3+ năm kinh nghiệm Product Management\n• Hiểu biết về Agile/Scrum\n• Kỹ năng phân tích và communication\n• Kinh nghiệm với product analytics",
@@ -156,6 +165,7 @@ export const mockJobs: JobPosting[] = [
   },
   {
     jobPostingId: 9,
+    slug: generateJobSlug("Junior Frontend Developer", 9),
     title: "Junior Frontend Developer",
     description: "Vị trí dành cho fresh graduate hoặc developer có ít kinh nghiệm. Sẽ được mentoring và đào tạo để phát triển kỹ năng frontend development.",
     requirements: "• Kiến thức cơ bản về HTML, CSS, JavaScript\n• Hiểu biết về React (có thể học thêm)\n• Đam mê học hỏi và phát triển\n• Tinh thần làm việc nhóm tốt",
@@ -175,6 +185,7 @@ export const mockJobs: JobPosting[] = [
   },
   {
     jobPostingId: 10,
+    slug: generateJobSlug("Internship - Software Development", 10),
     title: "Internship - Software Development",
     description: "Chương trình thực tập 6 tháng dành cho sinh viên năm cuối. Cơ hội học hỏi và làm việc với các dự án thực tế trong môi trường chuyên nghiệp.",
     requirements: "• Sinh viên năm 3-4 ngành CNTT\n• Kiến thức cơ bản về lập trình\n• Có thể commit full-time 6 tháng\n• Tiếng Anh giao tiếp cơ bản",
@@ -348,12 +359,17 @@ export const mockApi = {
     
     return filteredJobs.slice(startIndex, endIndex);
   },
-  
+
+  async getJobPostingBySlug(slug: string): Promise<JobPosting | null> {
+    await delay(300);
+    return mockJobs.find(job => job.slug === slug) || null;
+  },
+
   async getDepartments() {
     await delay(200);
     return mockDepartments;
   },
-  
+
   async getHeadquarters() {
     await delay(200);
     return mockHeadquarters;

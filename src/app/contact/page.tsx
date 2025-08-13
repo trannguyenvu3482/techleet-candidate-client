@@ -2,7 +2,11 @@
 
 import { Button } from "@/components/ui/button";
 import { Clock, Mail, MapPin, Phone, Send } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+// Note: This needs to stay as a client component due to form state
+// In a real app, you might want to split this into a server component wrapper
+// and a client component for the form to get better SEO
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -16,6 +20,15 @@ export default function ContactPage() {
   const [submitStatus, setSubmitStatus] = useState<
     "idle" | "success" | "error"
   >("idle");
+
+  // Set page title
+  useEffect(() => {
+    document.title = "Contact Us | TechLeet";
+
+    return () => {
+      document.title = "TechLeet";
+    };
+  }, []);
 
   const handleInputChange = (
     e: React.ChangeEvent<

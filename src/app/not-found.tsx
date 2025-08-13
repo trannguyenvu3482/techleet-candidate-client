@@ -1,6 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Home, Search } from "lucide-react";
 import Link from "next/link";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Page Not Found | TechLeet",
+  description: "The page you're looking for could not be found. Return to TechLeet homepage or browse our job listings.",
+  keywords: ["404", "not found", "TechLeet", "error"],
+};
 
 export default function NotFound() {
   return (

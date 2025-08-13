@@ -140,12 +140,12 @@ export function JobCard({ job }: JobCardProps) {
         </div>
         <div className="flex gap-2">
           <Button asChild variant="outline" size="sm">
-            <Link href={`/jobs/${job.jobPostingId}`}>
+            <Link href={`/jobs/${job.slug}`}>
               Xem chi tiết
             </Link>
           </Button>
           <Button asChild size="sm">
-            <Link href={`/jobs/${job.jobPostingId}/apply`}>
+            <Link href={`/jobs/${job.slug}/apply`}>
               Ứng tuyển
             </Link>
           </Button>

@@ -1,8 +1,6 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { mockDepartments, mockHeadquarters, mockJobs } from "@/data/mock-jobs";
+import { BackButton } from "@/components/ui/back-button";
+import { mockDepartments, mockHeadquarters, mockApi } from "@/data/mock-jobs";
 import type { JobPosting } from "@/lib/api";
 import { formatDate, formatRelativeTime, formatSalaryRange } from "@/lib/utils";
 import {
@@ -18,46 +16,75 @@ import {
   Users
 } from "lucide-react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 
-export default function JobDetailPage() {
-  const params = useParams();
-  const router = useRouter();
-  const jobId = parseInt(params.id as string);
-  
-  const [job, setJob] = useState<JobPosting | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+interface JobDetailPageProps {
+  params: {
+    id: string;
+  };
+}
 
-  useEffect(() => {
-    const fetchJob = async () => {
-      try {
-        setLoading(true);
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Find job in mock data
-        const foundJob = mockJobs.find(j => j.jobPostingId === jobId);
-        
-        if (!foundJob) {
-          setError("Không tìm thấy việc làm này");
-          return;
-        }
-        
-        setJob(foundJob);
-      } catch (err) {
-        console.error('Error fetching job:', err);
-        setError('Có lỗi xảy ra khi tải thông tin việc làm');
-      } finally {
-        setLoading(false);
-      }
-    };
+export async function generateMetadata({ params }: JobDetailPageProps): Promise<Metadata> {
+  const slug = params.id;
 
-    if (jobId) {
-      fetchJob();
+  try {
+    const job = await mockApi.getJobPostingBySlug(slug);
+
+    if (!job) {
+      return {
+        title: "Job Not Found | TechLeet Careers",
+        description: "The job you're looking for could not be found.",
+      };
     }
-  }, [jobId]);
+
+    const locationName = mockHeadquarters.find(h => h.headquarterId === job.headquarterId)?.city || "Hồ Chí Minh";
+    const departmentName = mockDepartments.find(d => d.departmentId === job.departmentId)?.departmentName || "Engineering";
+    const salaryRange = job.minSalary && job.maxSalary ? formatSalaryRange(job.minSalary, job.maxSalary) : "";
+
+    return {
+      title: `${job.title} | TechLeet Careers`,
+      description: `Join TechLeet as ${job.title} in ${locationName}. ${job.description.substring(0, 150)}...`,
+      keywords: [
+        job.title,
+        "TechLeet",
+        "careers",
+        "jobs",
+        locationName,
+        departmentName,
+        job.employmentType,
+        job.experienceLevel,
+      ],
+      openGraph: {
+        title: `${job.title} | TechLeet Careers`,
+        description: `Join TechLeet as ${job.title} in ${locationName}. ${salaryRange ? `Salary: ${salaryRange}. ` : ""}Apply now!`,
+        type: "website",
+      },
+    };
+  } catch (error) {
+    return {
+      title: "Job Details | TechLeet Careers",
+      description: "View job details and apply for positions at TechLeet.",
+    };
+  }
+}
+
+export default async function JobDetailPage({ params }: JobDetailPageProps) {
+  const slug = params.id;
+
+  let job: JobPosting | null = null;
+  let error: string | null = null;
+
+  try {
+    job = await mockApi.getJobPostingBySlug(slug);
+
+    if (!job) {
+      notFound();
+    }
+  } catch (err) {
+    console.error('Error fetching job:', err);
+    error = 'Có lỗi xảy ra khi tải thông tin việc làm';
+  }
 
   const getLocationName = (headquarterId: number) => {
     const hq = mockHeadquarters.find(h => h.headquarterId === headquarterId);
@@ -107,14 +134,6 @@ export default function JobDetailPage() {
     return diffInDays <= 7;
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
-  }
-
   if (error || !job) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -127,9 +146,11 @@ export default function JobDetailPage() {
             Việc làm này có thể đã bị xóa hoặc không còn tồn tại.
           </p>
           <div className="space-x-4">
-            <Button onClick={() => router.back()} variant="outline">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Quay lại
+            <Button asChild variant="outline">
+              <Link href="/jobs">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Quay lại danh sách
+              </Link>
             </Button>
             <Button asChild>
               <Link href="/jobs">
@@ -160,14 +181,10 @@ export default function JobDetailPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           {/* Back Button */}
-          <Button 
-            onClick={() => router.back()} 
-            variant="ghost" 
-            className="mb-6"
-          >
+          <BackButton className="mb-6">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Quay lại danh sách
-          </Button>
+          </BackButton>
 
           {/* Job Header */}
           <div className="bg-white rounded-lg shadow-sm border p-8 mb-6">
@@ -222,7 +239,7 @@ export default function JobDetailPage() {
               {/* Action Buttons */}
               <div className="flex flex-col gap-3 lg:w-48">
                 <Button asChild size="lg" className="w-full">
-                  <Link href={`/jobs/${job.jobPostingId}/apply`}>
+                  <Link href={`/jobs/${job.slug}/apply`}>
                     Ứng tuyển ngay
                   </Link>
                 </Button>
@@ -305,7 +322,7 @@ export default function JobDetailPage() {
                   Ứng tuyển nhanh
                 </h3>
                 <Button asChild className="w-full mb-3">
-                  <Link href={`/jobs/${job.jobPostingId}/apply`}>
+                  <Link href={`/jobs/${job.slug}/apply`}>
                     <Users className="mr-2 h-4 w-4" />
                     Ứng tuyển ngay
                   </Link>

@@ -42,6 +42,15 @@ export default function JobsPage() {
 
   const JOBS_PER_PAGE = 5;
 
+  // Set page title (client component approach)
+  useEffect(() => {
+    document.title = "Jobs | TechLeet Careers";
+
+    return () => {
+      document.title = "TechLeet";
+    };
+  }, []);
+
   // Fetch jobs function
   const fetchJobs = useCallback(async (pageNum: number, currentFilters: JobFilters, reset = false) => {
     try {

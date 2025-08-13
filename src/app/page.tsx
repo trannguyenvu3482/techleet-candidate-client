@@ -1,6 +1,18 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, MapPin } from "lucide-react";
 import Link from "next/link";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "TechLeet - Leading Technology Company in Vietnam",
+  description: "Join TechLeet and build the future of technology. We create breakthrough tech products that change how the world works.",
+  keywords: ["TechLeet", "technology", "careers", "jobs", "Vietnam", "software development"],
+  openGraph: {
+    title: "TechLeet - Leading Technology Company in Vietnam",
+    description: "Join TechLeet and build the future of technology. We create breakthrough tech products that change how the world works.",
+    type: "website",
+  },
+};
 
 export default function Home() {
   return (

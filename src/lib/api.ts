@@ -21,6 +21,7 @@ export interface ApiResponse<T = unknown> {
 
 export interface JobPosting {
   jobPostingId: number;
+  slug: string;
   title: string;
   description: string;
   requirements: string;

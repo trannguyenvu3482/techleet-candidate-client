@@ -104,6 +104,24 @@ export function generateSlug(text: string): string {
 }
 
 /**
+ * Generate job slug with unique ID
+ */
+export function generateJobSlug(title: string, jobId: number): string {
+  const baseSlug = generateSlug(title);
+  return `${baseSlug}-${jobId}`;
+}
+
+/**
+ * Extract job ID from slug
+ */
+export function extractJobIdFromSlug(slug: string): number | null {
+  const parts = slug.split('-');
+  const lastPart = parts[parts.length - 1];
+  const id = parseInt(lastPart);
+  return isNaN(id) ? null : id;
+}
+
+/**
  * File size formatter
  */
 export function formatFileSize(bytes: number): string {
