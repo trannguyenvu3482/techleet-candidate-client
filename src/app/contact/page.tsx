@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Building2, Mail, Phone, MapPin, Clock, Send } from "lucide-react";
+import { Building2, Clock, Mail, MapPin, Phone, Send } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 
 export default function ContactPage() {
@@ -38,6 +38,8 @@ export default function ContactPage() {
       setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
     } catch (error) {
       setSubmitStatus("error");
+      console.error(error);
+      
     } finally {
       setIsSubmitting(false);
     }

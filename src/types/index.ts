@@ -2,63 +2,25 @@
  * Type definitions for TechLeet Candidate Client
  */
 
+import { CompanyDepartment, CompanyHeadquarter, CompanyPosition, JobPosting } from '@/lib/api';
+
 // Re-export API types
 export type {
   ApiResponse,
   JobPosting,
   Candidate,
   Application,
+  CompanyDepartment,
+  CompanyPosition,
+  CompanyHeadquarter,
+  ApiError,
 } from '@/lib/api';
 
 // Additional UI-specific types
 export interface JobPostingWithDetails extends JobPosting {
-  department?: Department;
-  position?: Position;
-  headquarter?: Headquarter;
-}
-
-export interface Department {
-  departmentId: number;
-  departmentName: string;
-  description?: string;
-  budget?: number;
-  departmentCode: string;
-  headquarterId: number;
-  departmentTypeId: number;
-  leaderId?: number;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface Position {
-  positionId: number;
-  positionName: string;
-  description: string;
-  minSalary: number;
-  maxSalary: number;
-  level: number;
-  positionCode: string;
-  requirements?: string;
-  positionTypeId: number;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface Headquarter {
-  headquarterId: number;
-  headquarterName: string;
-  headquarterAddress: string;
-  headquarterPhone: string;
-  headquarterEmail: string;
-  city: string;
-  postalCode?: string;
-  description?: string;
-  isMainHeadquarter: boolean;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
+  department?: CompanyDepartment;
+  position?: CompanyPosition;
+  headquarter?: CompanyHeadquarter;
 }
 
 // Form types
