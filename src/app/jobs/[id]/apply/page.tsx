@@ -1,8 +1,9 @@
-import { mockApi, mockHeadquarters } from "@/data/mock-jobs";
+import { api, ApiError } from "@/lib/api";
 import type { JobPosting } from "@/lib/api";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { JobApplicationForm } from "./job-application-form";
+import { extractJobIdFromSlug, generateJobSlug } from "@/lib/utils";
 
 interface JobApplicationPageProps {
   params: Promise<{
@@ -15,7 +16,15 @@ export async function generateMetadata({ params }: JobApplicationPageProps): Pro
   const slug = id;
 
   try {
-    const job = await mockApi.getJobPostingBySlug(slug);
+    const jobId = extractJobIdFromSlug(slug);
+    if (!jobId) {
+      return {
+        title: "Job Application | TechLeet Careers",
+        description: "Apply for a position at TechLeet.",
+      };
+    }
+
+    const job = await api.getJobPosting(jobId);
 
     if (!job) {
       return {
@@ -24,7 +33,13 @@ export async function generateMetadata({ params }: JobApplicationPageProps): Pro
       };
     }
 
-    const locationName = mockHeadquarters.find(h => h.headquarterId === job.headquarterId)?.city || "Hồ Chí Minh";
+    let locationName = "Hồ Chí Minh";
+    try {
+      const headquarters = await api.getHeadquarters().catch(() => []);
+      locationName = headquarters.find((h: any) => h.headquarterId === job.headquarterId)?.city || locationName;
+    } catch {
+      // Use default
+    }
 
     return {
       title: `Apply for ${job.title} | TechLeet Careers`,
@@ -60,11 +75,22 @@ export default async function JobApplicationPage({ params }: JobApplicationPageP
   let job: JobPosting | null = null;
 
   try {
-    job = await mockApi.getJobPostingBySlug(slug);
+    const jobId = extractJobIdFromSlug(slug);
+    if (!jobId) {
+      notFound();
+    }
+
+    job = await api.getJobPosting(jobId);
 
     if (!job) {
       notFound();
     }
+
+    // Ensure job has slug
+    job = {
+      ...job,
+      slug: job.slug || generateJobSlug(job.title, job.jobPostingId)
+    };
   } catch (err) {
     console.error('Error fetching job:', err);
     notFound();

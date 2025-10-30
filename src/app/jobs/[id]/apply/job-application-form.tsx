@@ -14,9 +14,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Textarea } from "@/components/ui/textarea";
-import { mockDepartments, mockHeadquarters } from "@/data/mock-jobs";
-import type { JobPosting } from "@/lib/api";
-import { formatSalaryRange } from "@/lib/utils";
+import { api, ApiError } from "@/lib/api";
+import type { JobPosting, CompanyDepartment, CompanyHeadquarter } from "@/lib/api";
+import { formatSalaryRange, extractJobIdFromSlug } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ArrowLeft,
@@ -70,8 +70,12 @@ interface JobApplicationFormProps {
 export function JobApplicationForm({ job }: JobApplicationFormProps) {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [applicationId, setApplicationId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [headquarters, setHeadquarters] = useState<CompanyHeadquarter[]>([]);
+  const [departments, setDepartments] = useState<CompanyDepartment[]>([]);
 
   // Initialize React Hook Form with Zod validation
   const form = useForm<ApplicationFormData>({
@@ -104,13 +108,38 @@ export function JobApplicationForm({ job }: JobApplicationFormProps) {
     };
   }, [job.title]);
 
-  const getLocationName = (headquarterId: number) => {
-    const hq = mockHeadquarters.find(h => h.headquarterId === headquarterId);
+  // Load company data
+  useEffect(() => {
+    const loadCompanyData = async () => {
+      try {
+        const [hqData, deptData] = await Promise.all([
+          api.getHeadquarters().catch(() => []),
+          api.getDepartments().catch(() => [])
+        ]);
+        setHeadquarters(hqData);
+        setDepartments(deptData);
+      } catch (error) {
+        console.error('Error loading company data:', error);
+      }
+    };
+
+    loadCompanyData();
+  }, []);
+
+  const getLocationName = (headquarterId?: number) => {
+    if (!headquarterId) return "Hồ Chí Minh";
+    if (!Array.isArray(headquarters) || headquarters.length === 0) {
+      return "Hồ Chí Minh";
+    }
+    const hq = headquarters.find(h => h.headquarterId === headquarterId);
     return hq?.city || "Hồ Chí Minh";
   };
 
   const getDepartmentName = (departmentId: number) => {
-    const dept = mockDepartments.find(d => d.departmentId === departmentId);
+    if (!Array.isArray(departments) || departments.length === 0) {
+      return "Engineering";
+    }
+    const dept = departments.find(d => d.departmentId === departmentId);
     return dept?.departmentName || "Engineering";
   };
 
@@ -153,24 +182,84 @@ export function JobApplicationForm({ job }: JobApplicationFormProps) {
 
     setSubmitting(true);
     setError(null);
+    setUploadProgress(0);
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // In real implementation, you would:
-      // 1. Create candidate profile with form data
-      // 2. Upload resume file
-      // 3. Submit application
-      console.log('Form data:', data);
-      console.log('Resume file:', resumeFile);
-      
+      // Extract job ID from slug if needed
+      const jobId = extractJobIdFromSlug(job.slug || '') || job.jobPostingId;
+
+      // Step 1: Create candidate profile
+      setUploadProgress(20);
+      const candidateData = {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        phoneNumber: data.phoneNumber,
+        birthDate: data.dateOfBirth || undefined,
+        address: data.address || undefined,
+        educationLevel: data.education || undefined,
+        skills: data.skills || undefined,
+        programmingLanguages: data.skills || undefined,
+        portfolioUrl: data.portfolioUrl || undefined,
+        linkedInUrl: data.linkedinUrl || undefined,
+        summary: data.workExperience || undefined,
+      };
+
+      let candidate;
+      try {
+        candidate = await api.createCandidate(candidateData);
+      } catch (candidateError) {
+        // If candidate already exists (email duplicate), try to find by email
+        if (candidateError instanceof ApiError && candidateError.status === 400) {
+          // For now, we'll need to handle this by checking if email exists
+          // Since we don't have a getCandidateByEmail endpoint, we'll create a new candidate
+          // In production, you might want to update existing candidate instead
+          throw new Error('Email này đã được sử dụng. Vui lòng sử dụng email khác hoặc liên hệ với chúng tôi.');
+        }
+        throw candidateError;
+      }
+
+      setUploadProgress(40);
+
+      // Step 2: Upload resume file
+      const fileUploadResult = await api.uploadResume(resumeFile, jobId, candidate.candidateId);
+      setUploadProgress(60);
+
+      // Step 3: Create application
+      const applicationData = {
+        candidateId: candidate.candidateId!,
+        jobPostingId: jobId,
+        coverLetter: data.coverLetter || undefined,
+        resumeUrl: fileUploadResult.fileUrl,
+        // Do not send status - backend will set it to 'submitted' automatically
+      };
+
+      const application = await api.createApplication(applicationData);
+      setUploadProgress(100);
+
+      setApplicationId(application.applicationId || null);
       setSubmitted(true);
     } catch (err) {
       console.error('Error submitting application:', err);
-      setError('Có lỗi xảy ra khi nộp hồ sơ. Vui lòng thử lại.');
+      
+      if (err instanceof ApiError) {
+        if (err.status === 400) {
+          setError(err.message || 'Dữ liệu không hợp lệ. Vui lòng kiểm tra lại thông tin.');
+        } else if (err.status === 401 || err.status === 403) {
+          setError('Bạn không có quyền thực hiện hành động này. Vui lòng đăng nhập.');
+        } else if (err.status >= 500) {
+          setError('Lỗi hệ thống. Vui lòng thử lại sau.');
+        } else {
+          setError(err.message || `Lỗi ${err.status}: Không thể nộp hồ sơ.`);
+        }
+      } else if (err instanceof Error) {
+        setError(err.message || 'Có lỗi xảy ra khi nộp hồ sơ. Vui lòng thử lại.');
+      } else {
+        setError('Có lỗi xảy ra khi nộp hồ sơ. Vui lòng thử lại.');
+      }
     } finally {
       setSubmitting(false);
+      setUploadProgress(0);
     }
   };
 
@@ -182,10 +271,15 @@ export function JobApplicationForm({ job }: JobApplicationFormProps) {
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
             Ứng tuyển thành công!
           </h1>
-          <p className="text-gray-600 mb-6">
+          <p className="text-gray-600 mb-4">
             Cảm ơn bạn đã ứng tuyển vào vị trí <strong>{job.title}</strong>. 
             Chúng tôi sẽ xem xét hồ sơ và liên hệ với bạn trong thời gian sớm nhất.
           </p>
+          {applicationId && (
+            <p className="text-sm text-gray-500 mb-6">
+              Mã đơn ứng tuyển: <strong>#{applicationId}</strong>
+            </p>
+          )}
           <div className="space-y-3">
             <Button asChild className="w-full">
               <Link href="/jobs">
@@ -522,6 +616,12 @@ export function JobApplicationForm({ job }: JobApplicationFormProps) {
 
                     {/* Submit Button */}
                     <div className="pt-6 border-t">
+                      {error && (
+                        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                          <p className="text-red-800 text-sm">{error}</p>
+                        </div>
+                      )}
+                      
                       <Button 
                         type="submit" 
                         disabled={submitting}
@@ -531,12 +631,21 @@ export function JobApplicationForm({ job }: JobApplicationFormProps) {
                         {submitting ? (
                           <>
                             <LoadingSpinner size="sm" className="mr-2" />
-                            Đang nộp hồ sơ...
+                            Đang nộp hồ sơ... {uploadProgress > 0 && `(${uploadProgress}%)`}
                           </>
                         ) : (
                           'Nộp hồ sơ ứng tuyển'
                         )}
                       </Button>
+                      
+                      {submitting && uploadProgress > 0 && (
+                        <div className="mt-4 w-full bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                            style={{ width: `${uploadProgress}%` }}
+                          />
+                        </div>
+                      )}
                     </div>
                   </form>
                 </Form>
@@ -562,14 +671,18 @@ export function JobApplicationForm({ job }: JobApplicationFormProps) {
                         <MapPin className="h-4 w-4 mr-2" />
                         <span>{getLocationName(job.headquarterId)}</span>
                       </div>
-                      {job.minSalary && job.maxSalary && (
-                        <div className="flex items-center">
-                          <DollarSign className="h-4 w-4 mr-2" />
-                          <span className="font-medium text-green-600">
-                            {formatSalaryRange(job.minSalary, job.maxSalary)}
-                          </span>
-                        </div>
-                      )}
+                      {(() => {
+                        const min = job.minSalary || job.salaryMin;
+                        const max = job.maxSalary || job.salaryMax;
+                        return min && max ? (
+                          <div className="flex items-center">
+                            <DollarSign className="h-4 w-4 mr-2" />
+                            <span className="font-medium text-green-600">
+                              {formatSalaryRange(min, max)}
+                            </span>
+                          </div>
+                        ) : null;
+                      })()}
                       {job.applicationDeadline && (
                         <div className="flex items-center">
                           <Clock className="h-4 w-4 mr-2" />

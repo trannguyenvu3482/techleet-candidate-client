@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { BackButton } from "@/components/ui/back-button";
-import { mockDepartments, mockHeadquarters, mockApi } from "@/data/mock-jobs";
-import type { JobPosting } from "@/lib/api";
-import { formatDate, formatRelativeTime, formatSalaryRange } from "@/lib/utils";
+import { api, ApiError } from "@/lib/api";
+import type { JobPosting, CompanyDepartment, CompanyHeadquarter } from "@/lib/api";
+import { formatDate, formatRelativeTime, formatSalaryRange, extractJobIdFromSlug, generateJobSlug } from "@/lib/utils";
 import {
   AlertCircle,
   ArrowLeft,
@@ -30,7 +30,15 @@ export async function generateMetadata({ params }: JobDetailPageProps): Promise<
   const slug = id;
 
   try {
-    const job = await mockApi.getJobPostingBySlug(slug);
+    const jobId = extractJobIdFromSlug(slug);
+    if (!jobId) {
+      return {
+        title: "Job Not Found | TechLeet Careers",
+        description: "The job you're looking for could not be found.",
+      };
+    }
+
+    const job = await api.getJobPosting(jobId);
 
     if (!job) {
       return {
@@ -39,8 +47,20 @@ export async function generateMetadata({ params }: JobDetailPageProps): Promise<
       };
     }
 
-    const locationName = mockHeadquarters.find(h => h.headquarterId === job.headquarterId)?.city || "Hồ Chí Minh";
-    const departmentName = mockDepartments.find(d => d.departmentId === job.departmentId)?.departmentName || "Engineering";
+    // Fetch location and department if needed
+    let locationName = "Hồ Chí Minh";
+    let departmentName = "Engineering";
+    try {
+      const [headquarters, departments] = await Promise.all([
+        api.getHeadquarters().catch(() => []),
+        api.getDepartments().catch(() => [])
+      ]);
+      locationName = headquarters.find((h: CompanyHeadquarter) => h.headquarterId === job.headquarterId)?.city || locationName;
+      departmentName = departments.find((d: CompanyDepartment) => d.departmentId === job.departmentId)?.departmentName || departmentName;
+    } catch {
+      // Use defaults if fetch fails
+    }
+
     const salaryRange = job.minSalary && job.maxSalary ? formatSalaryRange(job.minSalary, job.maxSalary) : "";
 
     return {
@@ -77,25 +97,59 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
 
   let job: JobPosting | null = null;
   let error: string | null = null;
+  let headquarters: CompanyHeadquarter[] = [];
+  let departments: CompanyDepartment[] = [];
 
   try {
-    job = await mockApi.getJobPostingBySlug(slug);
+    const jobId = extractJobIdFromSlug(slug);
+    if (!jobId) {
+      notFound();
+    }
+
+    // Fetch job and related data in parallel
+    const [jobData, hqData, deptData] = await Promise.all([
+      api.getJobPosting(jobId).catch((err) => {
+        console.error('Error fetching job:', err);
+        throw err;
+      }),
+      api.getHeadquarters().catch(() => []),
+      api.getDepartments().catch(() => [])
+    ]);
+
+    job = {
+      ...jobData,
+      slug: jobData.slug || generateJobSlug(jobData.title, jobData.jobPostingId)
+    };
+    // Ensure these are arrays
+    headquarters = Array.isArray(hqData) ? hqData : [];
+    departments = Array.isArray(deptData) ? deptData : [];
 
     if (!job) {
       notFound();
     }
   } catch (err) {
     console.error('Error fetching job:', err);
-    error = 'Có lỗi xảy ra khi tải thông tin việc làm';
+    if (err instanceof ApiError) {
+      error = err.status === 404 ? 'Không tìm thấy việc làm này' : `Lỗi ${err.status}: ${err.message}`;
+    } else {
+      error = 'Có lỗi xảy ra khi tải thông tin việc làm';
+    }
   }
 
-  const getLocationName = (headquarterId: number) => {
-    const hq = mockHeadquarters.find(h => h.headquarterId === headquarterId);
+  const getLocationName = (headquarterId?: number) => {
+    if (!headquarterId) return "Hồ Chí Minh";
+    if (!Array.isArray(headquarters) || headquarters.length === 0) {
+      return "Hồ Chí Minh";
+    }
+    const hq = headquarters.find(h => h.headquarterId === headquarterId);
     return hq?.city || "Hồ Chí Minh";
   };
 
   const getDepartmentName = (departmentId: number) => {
-    const dept = mockDepartments.find(d => d.departmentId === departmentId);
+    if (!Array.isArray(departments) || departments.length === 0) {
+      return "Engineering";
+    }
+    const dept = departments.find(d => d.departmentId === departmentId);
     return dept?.departmentName || "Engineering";
   };
 
@@ -220,17 +274,21 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t">
                   <div className="flex items-center text-gray-600">
                     <MapPin className="h-5 w-5 mr-2" />
-                    <span>{getLocationName(job.headquarterId)}</span>
+                    <span>{job.location || getLocationName(job.headquarterId)}</span>
                   </div>
                   
-                  {job.minSalary && job.maxSalary && (
-                    <div className="flex items-center text-gray-600">
-                      <DollarSign className="h-5 w-5 mr-2" />
-                      <span className="font-medium text-green-600">
-                        {formatSalaryRange(job.minSalary, job.maxSalary)}
-                      </span>
-                    </div>
-                  )}
+                  {(() => {
+                    const min = job.minSalary || job.salaryMin;
+                    const max = job.maxSalary || job.salaryMax;
+                    return min && max ? (
+                      <div className="flex items-center text-gray-600">
+                        <DollarSign className="h-5 w-5 mr-2" />
+                        <span className="font-medium text-green-600">
+                          {formatSalaryRange(min, max)}
+                        </span>
+                      </div>
+                    ) : null;
+                  })()}
 
                   <div className="flex items-center text-gray-600">
                     <Calendar className="h-5 w-5 mr-2" />

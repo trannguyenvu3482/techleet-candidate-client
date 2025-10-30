@@ -7,9 +7,9 @@ import { JobCard } from "@/components/jobs/job-card";
 import { JobFilters } from "@/components/jobs/job-filters";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Search, Filter, SlidersHorizontal } from "lucide-react";
-// import { api, ApiError } from "@/lib/api"; // TODO: Use real API when backend is ready
+import { api, ApiError } from "@/lib/api";
 import type { JobPosting } from "@/lib/api";
-import { mockApi } from "@/data/mock-jobs";
+import { generateJobSlug } from "@/lib/utils";
 
 interface JobFilters {
   search: string;
@@ -77,16 +77,19 @@ export default function JobsPage() {
       if (currentFilters.minSalary) params.minSalary = parseInt(currentFilters.minSalary);
       if (currentFilters.maxSalary) params.maxSalary = parseInt(currentFilters.maxSalary);
 
-      // Use mock data for now, replace with real API later
-      const newJobs = await mockApi.getJobPostings(params);
+      // Use real API
+      const newJobs = await api.getJobPostings(params);
 
-      console.log("JOBS: ", newJobs);
-      
+      // Generate slugs for jobs that don't have them
+      const jobsWithSlugs = newJobs.map(job => ({
+        ...job,
+        slug: job.slug || generateJobSlug(job.title, job.jobPostingId)
+      }));
 
       if (reset || pageNum === 1) {
-        setJobs(newJobs);
+        setJobs(jobsWithSlugs);
       } else {
-        setJobs(prev => [...prev, ...newJobs]);
+        setJobs(prev => [...prev, ...jobsWithSlugs]);
       }
 
       // Check if there are more jobs to load
@@ -94,10 +97,12 @@ export default function JobsPage() {
       
     } catch (err) {
       console.error('Error fetching jobs:', err);
-      if (err instanceof Error) {
+      if (err instanceof ApiError) {
+        setError(err.message || `Lỗi ${err.status}: Không thể tải danh sách việc làm`);
+      } else if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('Có lỗi xảy ra khi tải danh sách việc làm');
+        setError('Có lỗi xảy ra khi tải danh sách việc làm. Vui lòng thử lại sau.');
       }
     } finally {
       setLoading(false);

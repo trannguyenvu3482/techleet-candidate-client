@@ -2,6 +2,9 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, MapPin } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { api } from "@/lib/api";
+import { generateJobSlug } from "@/lib/utils";
+import { JobCard } from "@/components/jobs/job-card";
 
 export const metadata: Metadata = {
   title: "TechLeet - Leading Technology Company in Vietnam",
@@ -14,7 +17,24 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Home() {
+export default async function Home() {
+  // Fetch featured jobs
+  let featuredJobs: any[] = [];
+  try {
+    const jobs = await api.getJobPostings({ 
+      status: 'published', 
+      limit: 3,
+      page: 1 
+    });
+    featuredJobs = jobs.map(job => ({
+      ...job,
+      slug: job.slug || generateJobSlug(job.title, job.jobPostingId)
+    }));
+  } catch (error) {
+    console.error('Error fetching featured jobs:', error);
+    // Continue with empty array if fetch fails
+  }
+
   return (
     <div>
 
@@ -281,33 +301,38 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {/* Sample job cards - will be replaced with real data */}
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-white rounded-lg shadow-sm border p-6 hover:shadow-md transition-shadow">
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">
-                      Senior Software Engineer
-                    </h3>
-                    <p className="text-sm text-gray-600">Engineering Team</p>
+            {featuredJobs.length > 0 ? (
+              featuredJobs.map((job) => (
+                <JobCard key={job.jobPostingId} job={job} />
+              ))
+            ) : (
+              // Fallback when no jobs available
+              [1, 2, 3].map((i) => (
+                <div key={i} className="bg-white rounded-lg shadow-sm border p-6 hover:shadow-md transition-shadow">
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-1">
+                        Đang tải việc làm...
+                      </h3>
+                      <p className="text-sm text-gray-600">Vui lòng đợi</p>
+                    </div>
+                    <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                      Full-time
+                    </span>
                   </div>
-                  <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
-                    Full-time
-                  </span>
+                  <div className="flex items-center text-sm text-gray-500 mb-4">
+                    <MapPin className="h-4 w-4 mr-1" />
+                    Hồ Chí Minh
+                  </div>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Đang tải thông tin việc làm...
+                  </p>
+                  <Button variant="outline" size="sm" className="w-full" disabled>
+                    Xem chi tiết
+                  </Button>
                 </div>
-                <div className="flex items-center text-sm text-gray-500 mb-4">
-                  <MapPin className="h-4 w-4 mr-1" />
-                  Hồ Chí Minh
-                </div>
-                <p className="text-sm text-gray-600 mb-4">
-                  Tham gia phát triển các sản phẩm công nghệ tiên tiến với đội ngũ kỹ sư
-                  giàu kinh nghiệm...
-                </p>
-                <Button variant="outline" size="sm" className="w-full">
-                  Xem chi tiết
-                </Button>
-              </div>
-            ))}
+              ))
+            )}
           </div>
 
           <div className="text-center">

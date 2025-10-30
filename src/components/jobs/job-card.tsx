@@ -3,17 +3,28 @@ import { Button } from "@/components/ui/button";
 import { MapPin, Clock, DollarSign, Building2, Calendar } from "lucide-react";
 import { formatSalaryRange, formatRelativeTime, truncateText } from "@/lib/utils";
 import type { JobPosting } from "@/lib/api";
-import { mockHeadquarters } from "@/data/mock-jobs";
 
 interface JobCardProps {
   job: JobPosting;
 }
 
 export function JobCard({ job }: JobCardProps) {
-  // Get location from headquarters data
-  const getLocationName = (headquarterId: number) => {
-    const hq = mockHeadquarters.find(h => h.headquarterId === headquarterId);
-    return hq?.city || "Hồ Chí Minh";
+  // Get location - prefer location field, fallback to headquarterId lookup
+  const getLocationName = () => {
+    if (job.location) {
+      return job.location;
+    }
+    // If no location field, use a default
+    return "Hồ Chí Minh";
+  };
+
+  const getSalaryDisplay = () => {
+    const min = job.minSalary || job.salaryMin;
+    const max = job.maxSalary || job.salaryMax;
+    if (min && max) {
+      return formatSalaryRange(min, max);
+    }
+    return null;
   };
 
   const getEmploymentTypeLabel = (type: string) => {
@@ -76,14 +87,14 @@ export function JobCard({ job }: JobCardProps) {
       <div className="space-y-2 mb-4">
         <div className="flex items-center text-sm text-gray-600">
           <MapPin className="h-4 w-4 mr-2" />
-          <span>{getLocationName(job.headquarterId)}</span>
+          <span>{getLocationName()}</span>
         </div>
         
-        {job.minSalary && job.maxSalary && (
+        {getSalaryDisplay() && (
           <div className="flex items-center text-sm text-gray-600">
             <DollarSign className="h-4 w-4 mr-2" />
             <span className="font-medium text-green-600">
-              {formatSalaryRange(job.minSalary, job.maxSalary)}
+              {getSalaryDisplay()}
             </span>
           </div>
         )}
@@ -140,12 +151,12 @@ export function JobCard({ job }: JobCardProps) {
         </div>
         <div className="flex gap-2">
           <Button asChild variant="outline" size="sm">
-            <Link href={`/jobs/${job.slug}`}>
+            <Link href={`/jobs/${job.slug || job.jobPostingId}`}>
               Xem chi tiết
             </Link>
           </Button>
           <Button asChild size="sm">
-            <Link href={`/jobs/${job.slug}/apply`}>
+            <Link href={`/jobs/${job.slug || job.jobPostingId}/apply`}>
               Ứng tuyển
             </Link>
           </Button>

@@ -4,9 +4,8 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { X, ChevronDown, ChevronUp } from "lucide-react";
-// import { api, ApiError } from "@/lib/api"; // TODO: Use real API when backend is ready
+import { api, ApiError } from "@/lib/api";
 import type { CompanyDepartment, CompanyHeadquarter } from "@/lib/api";
-import { mockApi } from "@/data/mock-jobs";
 
 interface JobFiltersProps {
   filters: {
@@ -64,15 +63,16 @@ export function JobFilters({ filters, onFilterChange, onClearFilters }: JobFilte
   useEffect(() => {
     const loadCompanyData = async () => {
       try {
-        // Use mock data for now, replace with real API later
         const [deptData, hqData] = await Promise.all([
-          mockApi.getDepartments(),
-          mockApi.getHeadquarters(),
+          api.getDepartments(),
+          api.getHeadquarters(),
         ]);
         setDepartments(deptData.filter(dept => dept.isActive));
         setHeadquarters(hqData.filter(hq => hq.isActive));
       } catch (error) {
         console.error('Error loading company data:', error);
+        // Don't show error to user, just log it
+        // Filters will work without this data
       }
     };
 

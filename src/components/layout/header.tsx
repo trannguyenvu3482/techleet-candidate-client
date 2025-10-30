@@ -13,6 +13,7 @@ export function Header() {
   const navigation = [
     { name: "Trang chủ", href: "/" },
     { name: "Việc làm", href: "/jobs" },
+    { name: "Đơn của tôi", href: "/applications" },
     { name: "Về chúng tôi", href: "/about" },
     { name: "Liên hệ", href: "/contact" },
   ];

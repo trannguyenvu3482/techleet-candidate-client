@@ -21,23 +21,27 @@ export interface ApiResponse<T = unknown> {
 
 export interface JobPosting {
   jobPostingId: number;
-  slug: string;
+  slug?: string;
   title: string;
   description: string;
   requirements: string;
-  minSalary: number;
-  maxSalary: number;
+  minSalary?: number;
+  maxSalary?: number;
+  salaryMin?: number; // Backend uses salaryMin/salaryMax
+  salaryMax?: number;
   employmentType: string;
   experienceLevel: string;
-  benefits: string;
+  benefits?: string;
   applicationDeadline: string;
   status: 'draft' | 'active' | 'closed' | "published";
   departmentId: number;
   positionId: number;
-  headquarterId: number;
+  headquarterId?: number;
+  location?: string;
   createdAt: string;
   updatedAt: string;
-  isActive: boolean;
+  isActive?: boolean;
+  isJobActive?: boolean;
 }
 
 export interface Candidate {
@@ -46,18 +50,23 @@ export interface Candidate {
   lastName: string;
   email: string;
   phoneNumber: string;
-  dateOfBirth: string;
-  address: string;
-  city: string;
+  dateOfBirth?: string;
+  birthDate?: string; // Backend uses birthDate
+  address?: string;
+  city?: string;
   postalCode?: string;
-  education: string;
-  workExperience: string;
-  skills: string;
+  education?: string;
+  educationLevel?: string; // Backend uses educationLevel
+  workExperience?: string;
+  summary?: string; // Backend uses summary
+  skills?: string;
+  programmingLanguages?: string;
   certifications?: string;
   portfolioUrl?: string;
   linkedinUrl?: string;
+  linkedInUrl?: string; // Backend uses linkedInUrl
   resumeUrl?: string;
-  status: 'active' | 'inactive';
+  status?: 'active' | 'inactive' | 'new';
   createdAt?: string;
   updatedAt?: string;
 }
@@ -68,8 +77,10 @@ export interface Application {
   jobPostingId: number;
   coverLetter?: string;
   resumeUrl?: string;
-  status: 'submitted' | 'screening' | 'interviewing' | 'offer' | 'hired' | 'rejected' | 'withdrawn';
+  status?: 'submitted' | 'screening' | 'screening_passed' | 'screening_failed' | 'interviewing' | 'offer' | 'hired' | 'rejected' | 'withdrawn';
   appliedAt?: string;
+  appliedDate?: string;
+  screeningStatus?: string;
   notes?: string;
 }
 
@@ -275,19 +286,95 @@ class ApiClient {
     return this.request<T>("POST", endpoint, { body: formData });
   }
 
+  // File upload specifically for resume
+  async uploadResume(file: File, jobPostingId: number, candidateId?: number): Promise<{ fileId: number; fileUrl: string; originalName: string }> {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("fileType", "candidate_resume"); 
+    if (candidateId) {
+      formData.append("referenceId", String(candidateId));
+    } else {
+      // Use jobPostingId as referenceId temporarily
+      formData.append("referenceId", String(jobPostingId));
+    }
+
+    const response = await this.request<{ fileId: number; fileUrl: string; originalName: string }>(
+      "POST",
+      "/api/v1/recruitment-service/files/upload",
+      { body: formData }
+    );
+    
+    return response;
+  }
+
   // Job Posting APIs
   async getJobPostings(params?: {
     status?: string;
     departmentId?: number;
+    headquarterId?: number;
     search?: string;
+    keyword?: string;
+    employmentType?: string;
+    experienceLevel?: string;
+    minSalary?: number;
+    maxSalary?: number;
     page?: number;
     limit?: number;
   }): Promise<JobPosting[]> {
-    return this.get<JobPosting[]>('/api/v1/recruitment-service/job-postings', params);
+    // Convert frontend params to backend params
+    const backendParams: Record<string, unknown> = {};
+    if (params?.status) backendParams.status = params.status;
+    if (params?.departmentId) backendParams.departmentId = params.departmentId;
+    if (params?.employmentType) backendParams.employmentType = params.employmentType;
+    if (params?.experienceLevel) backendParams.experienceLevel = params.experienceLevel;
+    if (params?.search) backendParams.keyword = params.search;
+    if (params?.keyword) backendParams.keyword = params.keyword;
+    if (params?.minSalary) backendParams.minSalary = params.minSalary;
+    if (params?.maxSalary) backendParams.maxSalary = params.maxSalary;
+    if (params?.page !== undefined) backendParams.page = params.page;
+    if (params?.limit !== undefined) backendParams.limit = params.limit;
+
+    const response = await this.get<{ data: JobPosting[]; total: number; page: number; limit: number } | JobPosting[]>('/api/v1/recruitment-service/job-postings', backendParams);
+    
+    // Handle both array response and paginated response
+    if (Array.isArray(response)) {
+      return response.map(job => ({
+        ...job,
+        minSalary: job.salaryMin || job.minSalary,
+        maxSalary: job.salaryMax || job.maxSalary,
+      }));
+    }
+    
+    // Normalize salary fields
+    return (response.data || []).map(job => ({
+      ...job,
+      minSalary: job.salaryMin || job.minSalary,
+      maxSalary: job.salaryMax || job.maxSalary,
+    }));
   }
 
   async getJobPosting(id: number): Promise<JobPosting> {
-    return this.get<JobPosting>(`/api/v1/recruitment-service/job-postings/${id}`);
+    const job = await this.get<JobPosting>(`/api/v1/recruitment-service/job-postings/${id}`);
+    // Normalize salary fields
+    return {
+      ...job,
+      minSalary: job.salaryMin || job.minSalary,
+      maxSalary: job.salaryMax || job.maxSalary,
+    };
+  }
+
+  async getJobPostingBySlug(slug: string): Promise<JobPosting | null> {
+    // Extract ID from slug (format: title-slug-123)
+    const parts = slug.split('-');
+    const id = parseInt(parts[parts.length - 1]);
+    if (isNaN(id)) {
+      return null;
+    }
+    try {
+      return await this.getJobPosting(id);
+    } catch {
+      return null;
+    }
   }
 
   // Candidate APIs
@@ -309,7 +396,17 @@ class ApiClient {
   }
 
   async getApplicationsByCandidate(candidateId: number): Promise<Application[]> {
-    return this.get<Application[]>('/api/v1/recruitment-service/applications', { candidateId });
+    const response = await this.get<{ data: Application[] } | Application[]>('/api/v1/recruitment-service/applications', { candidateId });
+    // Handle both array response and paginated response
+    if (Array.isArray(response)) {
+      return response;
+    }
+    return response.data || [];
+  }
+
+  async getApplicationsByEmail(email: string): Promise<Application[]> {
+    const response = await this.get<Application[]>('/api/v1/recruitment-service/applications/by-email', { email });
+    return Array.isArray(response) ? response : [];
   }
 
   async getApplication(id: number): Promise<Application> {
@@ -318,15 +415,30 @@ class ApiClient {
 
   // Company Data APIs (for job posting details)
   async getDepartments(): Promise<CompanyDepartment[]> {
-    return this.get<CompanyDepartment[]>('/api/v1/company-service/departments');
+    const response = await this.get<{ data: CompanyDepartment[]; total: number } | CompanyDepartment[]>('/api/v1/company-service/departments');
+    // Handle both array response and paginated response
+    if (Array.isArray(response)) {
+      return response;
+    }
+    return response.data || [];
   }
 
   async getPositions(): Promise<CompanyPosition[]> {
-    return this.get<CompanyPosition[]>('/api/v1/company-service/positions');
+    const response = await this.get<{ data: CompanyPosition[]; total: number } | CompanyPosition[]>('/api/v1/company-service/positions');
+    // Handle both array response and paginated response
+    if (Array.isArray(response)) {
+      return response;
+    }
+    return response.data || [];
   }
 
   async getHeadquarters(): Promise<CompanyHeadquarter[]> {
-    return this.get<CompanyHeadquarter[]>('/api/v1/company-service/headquarters');
+    const response = await this.get<{ data: CompanyHeadquarter[]; total: number } | CompanyHeadquarter[]>('/api/v1/company-service/headquarters');
+    // Handle both array response and paginated response
+    if (Array.isArray(response)) {
+      return response;
+    }
+    return response.data || [];
   }
 }
 
