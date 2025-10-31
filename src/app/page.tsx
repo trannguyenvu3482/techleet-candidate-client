@@ -3,6 +3,7 @@ import { ArrowRight, MapPin } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { api } from "@/lib/api";
+import type { JobPosting } from "@/lib/api";
 import { generateJobSlug } from "@/lib/utils";
 import { JobCard } from "@/components/jobs/job-card";
 
@@ -19,7 +20,7 @@ export const metadata: Metadata = {
 
 export default async function Home() {
   // Fetch featured jobs
-  let featuredJobs: any[] = [];
+  let featuredJobs: JobPosting[] = [];
   try {
     const jobs = await api.getJobPostings({ 
       status: 'published', 

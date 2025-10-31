@@ -344,11 +344,17 @@ export const mockApi = {
     }
     
     if (params?.minSalary) {
-      filteredJobs = filteredJobs.filter(job => job.maxSalary >= params.minSalary!);
+      filteredJobs = filteredJobs.filter(job => {
+        if (job.maxSalary === undefined) return true;
+        return job.maxSalary >= params.minSalary!;
+      });
     }
     
     if (params?.maxSalary) {
-      filteredJobs = filteredJobs.filter(job => job.minSalary <= params.maxSalary!);
+      filteredJobs = filteredJobs.filter(job => {
+        if (job.minSalary === undefined) return true;
+        return job.minSalary <= params.maxSalary!;
+      });
     }
     
     // Pagination

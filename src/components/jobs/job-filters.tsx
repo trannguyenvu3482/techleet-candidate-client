@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { X, ChevronDown, ChevronUp } from "lucide-react";
-import { api, ApiError } from "@/lib/api";
+import { api } from "@/lib/api";
 import type { CompanyDepartment, CompanyHeadquarter } from "@/lib/api";
 
 interface JobFiltersProps {

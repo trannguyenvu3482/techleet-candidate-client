@@ -1,5 +1,5 @@
-import { api, ApiError } from "@/lib/api";
-import type { JobPosting } from "@/lib/api";
+import { api } from "@/lib/api";
+import type { JobPosting, CompanyHeadquarter } from "@/lib/api";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { JobApplicationForm } from "./job-application-form";
@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: JobApplicationPageProps): Pro
     let locationName = "Hồ Chí Minh";
     try {
       const headquarters = await api.getHeadquarters().catch(() => []);
-      locationName = headquarters.find((h: any) => h.headquarterId === job.headquarterId)?.city || locationName;
+      locationName = headquarters.find((h: CompanyHeadquarter) => h.headquarterId === job.headquarterId)?.city || locationName;
     } catch {
       // Use default
     }

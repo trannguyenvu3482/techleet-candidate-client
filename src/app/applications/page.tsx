@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,7 +15,7 @@ interface ApplicationWithJob extends Application {
   job?: JobPosting;
 }
 
-export default function ApplicationsPage() {
+function ApplicationsContent() {
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [searching, setSearching] = useState(false);
@@ -404,6 +404,18 @@ export default function ApplicationsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ApplicationsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <LoadingSpinner size="lg" />
+      </div>
+    }>
+      <ApplicationsContent />
+    </Suspense>
   );
 }
 
