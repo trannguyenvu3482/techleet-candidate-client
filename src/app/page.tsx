@@ -24,10 +24,8 @@ export default async function Home() {
   try {
     const jobs = await api.getJobPostings({ 
       status: 'published', 
-      limit: 3,
-      page: 1 
     });
-    featuredJobs = jobs.map(job => ({
+    featuredJobs = jobs.slice(0, 3).map(job => ({
       ...job,
       slug: job.slug || generateJobSlug(job.title, job.jobPostingId)
     }));

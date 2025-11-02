@@ -24,10 +24,7 @@ interface JobFilters {
 export default function JobsPage() {
   const [jobs, setJobs] = useState<JobPosting[]>([]);
   const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
   
   const [filters, setFilters] = useState<JobFilters>({
@@ -40,10 +37,10 @@ export default function JobsPage() {
     maxSalary: "",
   });
 
-  const JOBS_PER_PAGE = 5;
 
   // Set page title (client component approach)
   useEffect(() => {
+    document.title = "Tìm việc làm - TechLeet";
     document.title = "Jobs | TechLeet Careers";
 
     return () => {
@@ -52,19 +49,13 @@ export default function JobsPage() {
   }, []);
 
   // Fetch jobs function
-  const fetchJobs = useCallback(async (pageNum: number, currentFilters: JobFilters, reset = false) => {
+  const fetchJobs = useCallback(async (currentFilters: JobFilters) => {
     try {
-      if (pageNum === 1) {
-        setLoading(true);
-      } else {
-        setLoadingMore(true);
-      }
+      setLoading(true);
       setError(null);
 
-      // Build API parameters
+      // Build API parameters (no page/limit - fetch all)
       const params: Record<string, unknown> = {
-        page: pageNum,
-        limit: JOBS_PER_PAGE,
         status: 'published',
       };
 
@@ -77,23 +68,16 @@ export default function JobsPage() {
       if (currentFilters.minSalary) params.minSalary = parseInt(currentFilters.minSalary);
       if (currentFilters.maxSalary) params.maxSalary = parseInt(currentFilters.maxSalary);
 
-      // Use real API
-      const newJobs = await api.getJobPostings(params);
+      // Use real API - fetches all jobs
+      const allJobs = await api.getJobPostings(params);
 
       // Generate slugs for jobs that don't have them
-      const jobsWithSlugs = newJobs.map(job => ({
+      const jobsWithSlugs = allJobs.map(job => ({
         ...job,
         slug: job.slug || generateJobSlug(job.title, job.jobPostingId)
       }));
 
-      if (reset || pageNum === 1) {
-        setJobs(jobsWithSlugs);
-      } else {
-        setJobs(prev => [...prev, ...jobsWithSlugs]);
-      }
-
-      // Check if there are more jobs to load
-      setHasMore(newJobs.length === JOBS_PER_PAGE);
+      setJobs(jobsWithSlugs);
       
     } catch (err) {
       console.error('Error fetching jobs:', err);
@@ -106,35 +90,24 @@ export default function JobsPage() {
       }
     } finally {
       setLoading(false);
-      setLoadingMore(false);
     }
   }, []);
 
   // Initial load
   useEffect(() => {
-    fetchJobs(1, filters);
+    fetchJobs(filters);
   }, [fetchJobs, filters]);
 
   // Handle filter changes
   const handleFilterChange = (newFilters: Partial<JobFilters>) => {
     const updatedFilters = { ...filters, ...newFilters };
     setFilters(updatedFilters);
-    setPage(1);
-    fetchJobs(1, updatedFilters, true);
+    fetchJobs(updatedFilters);
   };
 
   // Handle search
   const handleSearch = (searchTerm: string) => {
     handleFilterChange({ search: searchTerm });
-  };
-
-  // Load more jobs
-  const loadMore = () => {
-    if (!loadingMore && hasMore) {
-      const nextPage = page + 1;
-      setPage(nextPage);
-      fetchJobs(nextPage, filters);
-    }
   };
 
   // Clear all filters
@@ -149,8 +122,7 @@ export default function JobsPage() {
       maxSalary: "",
     };
     setFilters(clearedFilters);
-    setPage(1);
-    fetchJobs(1, clearedFilters, true);
+    fetchJobs(clearedFilters);
   };
 
   return (
@@ -219,7 +191,7 @@ export default function JobsPage() {
               ) : error ? (
                 <div className="text-center py-12">
                   <div className="text-red-600 mb-4">{error}</div>
-                  <Button onClick={() => fetchJobs(1, filters, true)}>
+                  <Button onClick={() => fetchJobs(filters)}>
                     Thử lại
                   </Button>
                 </div>
@@ -252,36 +224,6 @@ export default function JobsPage() {
                       <JobCard key={job.jobPostingId} job={job} />
                     ))}
                   </div>
-
-                  {/* Load More Button */}
-                  {hasMore && (
-                    <div className="text-center mt-8">
-                      <Button
-                        onClick={loadMore}
-                        disabled={loadingMore}
-                        size="lg"
-                        variant="outline"
-                      >
-                        {loadingMore ? (
-                          <>
-                            <LoadingSpinner size="sm" className="mr-2" />
-                            Đang tải...
-                          </>
-                        ) : (
-                          'Xem thêm việc làm'
-                        )}
-                      </Button>
-                    </div>
-                  )}
-
-                  {/* End of Results */}
-                  {!hasMore && jobs.length > 0 && (
-                    <div className="text-center mt-8 py-6 border-t">
-                      <p className="text-gray-500">
-                        Bạn đã xem hết tất cả việc làm phù hợp
-                      </p>
-                    </div>
-                  )}
                 </>
               )}
             </div>

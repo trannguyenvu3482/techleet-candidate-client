@@ -318,10 +318,8 @@ class ApiClient {
     experienceLevel?: string;
     minSalary?: number;
     maxSalary?: number;
-    page?: number;
-    limit?: number;
   }): Promise<JobPosting[]> {
-    // Convert frontend params to backend params
+    // Convert frontend params to backend params (no page/limit - fetch all)
     const backendParams: Record<string, unknown> = {};
     if (params?.status) backendParams.status = params.status;
     if (params?.departmentId) backendParams.departmentId = params.departmentId;
@@ -331,8 +329,7 @@ class ApiClient {
     if (params?.keyword) backendParams.keyword = params.keyword;
     if (params?.minSalary) backendParams.minSalary = params.minSalary;
     if (params?.maxSalary) backendParams.maxSalary = params.maxSalary;
-    if (params?.page !== undefined) backendParams.page = params.page;
-    if (params?.limit !== undefined) backendParams.limit = params.limit;
+    // Note: page and limit are intentionally omitted to fetch all results
 
     const response = await this.get<{ data: JobPosting[]; total: number; page: number; limit: number } | JobPosting[]>('/api/v1/recruitment-service/job-postings', backendParams);
     
