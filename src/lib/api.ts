@@ -33,7 +33,7 @@ export interface JobPosting {
   experienceLevel: string;
   benefits?: string;
   applicationDeadline: string;
-  status: 'draft' | 'active' | 'closed' | "published";
+  status: "draft" | "active" | "closed" | "published";
   departmentId: number;
   positionId: number;
   headquarterId?: number;
@@ -66,7 +66,7 @@ export interface Candidate {
   linkedinUrl?: string;
   linkedInUrl?: string; // Backend uses linkedInUrl
   resumeUrl?: string;
-  status?: 'active' | 'inactive' | 'new';
+  status?: "active" | "inactive" | "new";
   createdAt?: string;
   updatedAt?: string;
 }
@@ -77,11 +77,40 @@ export interface Application {
   jobPostingId: number;
   coverLetter?: string;
   resumeUrl?: string;
-  status?: 'submitted' | 'screening' | 'screening_passed' | 'screening_failed' | 'interviewing' | 'offer' | 'hired' | 'rejected' | 'withdrawn';
+  status?:
+    | "submitted"
+    | "screening"
+    | "screening_passed"
+    | "screening_failed"
+    | "interviewing"
+    | "offer"
+    | "hired"
+    | "rejected"
+    | "withdrawn"
+    | "passed_exam"
+    | "failed_exam";
   appliedAt?: string;
   appliedDate?: string;
   screeningStatus?: string;
   notes?: string;
+  reviewNotes?: string;
+  offerDate?: string;
+  offeredSalary?: number;
+  offerExpiryDate?: string;
+  offerStatus?: string;
+  offerResponseDate?: string;
+  rejectionReason?: string;
+  expectedStartDate?: string;
+  isScreeningCompleted?: boolean;
+  screeningScore?: number;
+  screeningCompletedAt?: string;
+  daysSinceApplied?: number;
+  formattedOfferedSalary?: string;
+  isOfferActive?: boolean;
+  daysUntilOfferExpiry?: number;
+  statusColor?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 // Custom error class for API errors
@@ -102,7 +131,8 @@ class ApiClient {
   private defaultTimeout: number;
 
   constructor(baseURL?: string, timeout = 10000) {
-    this.baseURL = baseURL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:3030";
+    this.baseURL =
+      baseURL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:3030";
     this.defaultTimeout = timeout;
   }
 
@@ -287,10 +317,14 @@ class ApiClient {
   }
 
   // File upload specifically for resume
-  async uploadResume(file: File, jobPostingId: number, candidateId?: number): Promise<{ fileId: number; fileUrl: string; originalName: string }> {
+  async uploadResume(
+    file: File,
+    jobPostingId: number,
+    candidateId?: number
+  ): Promise<{ fileId: number; fileUrl: string; originalName: string }> {
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("fileType", "candidate_resume"); 
+    formData.append("fileType", "candidate_resume");
     if (candidateId) {
       formData.append("referenceId", String(candidateId));
     } else {
@@ -298,12 +332,12 @@ class ApiClient {
       formData.append("referenceId", String(jobPostingId));
     }
 
-    const response = await this.request<{ fileId: number; fileUrl: string; originalName: string }>(
-      "POST",
-      "/api/v1/recruitment-service/files/upload",
-      { body: formData }
-    );
-    
+    const response = await this.request<{
+      fileId: number;
+      fileUrl: string;
+      originalName: string;
+    }>("POST", "/api/v1/recruitment-service/files/upload", { body: formData });
+
     return response;
   }
 
@@ -323,27 +357,32 @@ class ApiClient {
     const backendParams: Record<string, unknown> = {};
     if (params?.status) backendParams.status = params.status;
     if (params?.departmentId) backendParams.departmentId = params.departmentId;
-    if (params?.employmentType) backendParams.employmentType = params.employmentType;
-    if (params?.experienceLevel) backendParams.experienceLevel = params.experienceLevel;
+    if (params?.employmentType)
+      backendParams.employmentType = params.employmentType;
+    if (params?.experienceLevel)
+      backendParams.experienceLevel = params.experienceLevel;
     if (params?.search) backendParams.keyword = params.search;
     if (params?.keyword) backendParams.keyword = params.keyword;
     if (params?.minSalary) backendParams.minSalary = params.minSalary;
     if (params?.maxSalary) backendParams.maxSalary = params.maxSalary;
     // Note: page and limit are intentionally omitted to fetch all results
 
-    const response = await this.get<{ data: JobPosting[]; total: number; page: number; limit: number } | JobPosting[]>('/api/v1/recruitment-service/job-postings', backendParams);
-    
+    const response = await this.get<
+      | { data: JobPosting[]; total: number; page: number; limit: number }
+      | JobPosting[]
+    >("/api/v1/recruitment-service/job-postings", backendParams);
+
     // Handle both array response and paginated response
     if (Array.isArray(response)) {
-      return response.map(job => ({
+      return response.map((job) => ({
         ...job,
         minSalary: job.salaryMin || job.minSalary,
         maxSalary: job.salaryMax || job.maxSalary,
       }));
     }
-    
+
     // Normalize salary fields
-    return (response.data || []).map(job => ({
+    return (response.data || []).map((job) => ({
       ...job,
       minSalary: job.salaryMin || job.minSalary,
       maxSalary: job.salaryMax || job.maxSalary,
@@ -351,7 +390,9 @@ class ApiClient {
   }
 
   async getJobPosting(id: number): Promise<JobPosting> {
-    const job = await this.get<JobPosting>(`/api/v1/recruitment-service/job-postings/${id}`);
+    const job = await this.get<JobPosting>(
+      `/api/v1/recruitment-service/job-postings/${id}`
+    );
     // Normalize salary fields
     return {
       ...job,
@@ -362,7 +403,7 @@ class ApiClient {
 
   async getJobPostingBySlug(slug: string): Promise<JobPosting | null> {
     // Extract ID from slug (format: title-slug-123)
-    const parts = slug.split('-');
+    const parts = slug.split("-");
     const id = parseInt(parts[parts.length - 1]);
     if (isNaN(id)) {
       return null;
@@ -375,25 +416,46 @@ class ApiClient {
   }
 
   // Candidate APIs
-  async createCandidate(candidate: Omit<Candidate, 'candidateId' | 'createdAt' | 'updatedAt'>): Promise<Candidate> {
-    return this.post<Candidate>('/api/v1/recruitment-service/candidates', candidate);
+  async createCandidate(
+    candidate: Omit<Candidate, "candidateId" | "createdAt" | "updatedAt">
+  ): Promise<Candidate> {
+    return this.post<Candidate>(
+      "/api/v1/recruitment-service/candidates",
+      candidate
+    );
   }
 
   async getCandidate(id: number): Promise<Candidate> {
     return this.get<Candidate>(`/api/v1/recruitment-service/candidates/${id}`);
   }
 
-  async updateCandidate(id: number, candidate: Partial<Candidate>): Promise<Candidate> {
-    return this.patch<Candidate>(`/api/v1/recruitment-service/candidates/${id}`, candidate);
+  async updateCandidate(
+    id: number,
+    candidate: Partial<Candidate>
+  ): Promise<Candidate> {
+    return this.patch<Candidate>(
+      `/api/v1/recruitment-service/candidates/${id}`,
+      candidate
+    );
   }
 
   // Application APIs
-  async createApplication(application: Omit<Application, 'applicationId' | 'appliedAt'>): Promise<Application> {
-    return this.post<Application>('/api/v1/recruitment-service/applications', application);
+  async createApplication(
+    application: Omit<Application, "applicationId" | "appliedAt">
+  ): Promise<Application> {
+    return this.post<Application>(
+      "/api/v1/recruitment-service/applications",
+      application
+    );
   }
 
-  async getApplicationsByCandidate(candidateId: number): Promise<Application[]> {
-    const response = await this.get<{ data: Application[] } | Application[]>('/api/v1/recruitment-service/applications', { candidateId });
+  async getApplicationsByCandidate(
+    candidateId: number
+  ): Promise<Application[]> {
+    const response = await this.get<{ data: Application[] } | Application[]>(
+      "/api/v1/recruitment-service/applications",
+      { candidateId }
+    );
     // Handle both array response and paginated response
     if (Array.isArray(response)) {
       return response;
@@ -402,17 +464,24 @@ class ApiClient {
   }
 
   async getApplicationsByEmail(email: string): Promise<Application[]> {
-    const response = await this.get<Application[]>('/api/v1/recruitment-service/applications/by-email', { email });
+    const response = await this.get<Application[]>(
+      "/api/v1/recruitment-service/applications/by-email",
+      { email }
+    );
     return Array.isArray(response) ? response : [];
   }
 
   async getApplication(id: number): Promise<Application> {
-    return this.get<Application>(`/api/v1/recruitment-service/applications/${id}`);
+    return this.get<Application>(
+      `/api/v1/recruitment-service/applications/${id}`
+    );
   }
 
   // Company Data APIs (for job posting details)
   async getDepartments(): Promise<CompanyDepartment[]> {
-    const response = await this.get<{ data: CompanyDepartment[]; total: number } | CompanyDepartment[]>('/api/v1/company-service/departments');
+    const response = await this.get<
+      { data: CompanyDepartment[]; total: number } | CompanyDepartment[]
+    >("/api/v1/company-service/departments");
     // Handle both array response and paginated response
     if (Array.isArray(response)) {
       return response;
@@ -421,7 +490,9 @@ class ApiClient {
   }
 
   async getPositions(): Promise<CompanyPosition[]> {
-    const response = await this.get<{ data: CompanyPosition[]; total: number } | CompanyPosition[]>('/api/v1/company-service/positions');
+    const response = await this.get<
+      { data: CompanyPosition[]; total: number } | CompanyPosition[]
+    >("/api/v1/company-service/positions");
     // Handle both array response and paginated response
     if (Array.isArray(response)) {
       return response;
@@ -430,7 +501,9 @@ class ApiClient {
   }
 
   async getHeadquarters(): Promise<CompanyHeadquarter[]> {
-    const response = await this.get<{ data: CompanyHeadquarter[]; total: number } | CompanyHeadquarter[]>('/api/v1/company-service/headquarters');
+    const response = await this.get<
+      { data: CompanyHeadquarter[]; total: number } | CompanyHeadquarter[]
+    >("/api/v1/company-service/headquarters");
     // Handle both array response and paginated response
     if (Array.isArray(response)) {
       return response;
