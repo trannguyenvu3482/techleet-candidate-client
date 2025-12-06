@@ -558,210 +558,210 @@ function ApplicationsContent() {
                                   {app.screeningScore !== undefined &&
                                     app.screeningScore !== null && (
                                       <span className="flex items-center">
-                                        <CheckCircle className="h-4 w-4 mr-1 text-green-600" />
-                                        Điểm: {app.screeningScore.toFixed(1)}
-                                        /100
-                                      </span>
-                                    )}
-                                </div>
+                                      <CheckCircle className="h-4 w-4 mr-1 text-green-600" />
+                                      Điểm: {Number(app.screeningScore).toFixed(1)}
+                                      /100
+                                    </span>
+                                  )}
                               </div>
                             </div>
-
-                            {app.job && (
-                              <div className="ml-16 mb-4">
-                                <p className="text-sm text-gray-600 line-clamp-2">
-                                  {app.job.description?.substring(0, 150)}...
-                                </p>
-                              </div>
-                            )}
                           </div>
 
-                          <div className="flex flex-col items-end gap-2">
-                            {app.applicationId && (
-                              <span className="text-xs text-gray-500">
-                                ID: #{app.applicationId}
-                              </span>
-                            )}
-                          </div>
+                          {app.job && (
+                            <div className="ml-16 mb-4">
+                              <p className="text-sm text-gray-600 line-clamp-2">
+                                {app.job.description?.substring(0, 150)}...
+                              </p>
+                            </div>
+                          )}
                         </div>
 
-                        {/* Progress Bar */}
-                        <div className="mt-6 pt-6 border-t">
-                          <div className="w-full">
-                            {(() => {
-                              const currentStep = getProgressStep(
-                                app.status,
-                                app.screeningStatus
-                              );
-                              return (
-                                <div className="relative flex items-center justify-between">
-                                  <div className="absolute top-5 left-0 right-0 h-0.5 bg-gray-200">
+                        <div className="flex flex-col items-end gap-2">
+                          {app.applicationId && (
+                            <span className="text-xs text-gray-500">
+                              ID: #{app.applicationId}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Progress Bar */}
+                      <div className="mt-6 pt-6 border-t">
+                        <div className="w-full">
+                          {(() => {
+                            const currentStep = getProgressStep(
+                              app.status,
+                              app.screeningStatus
+                            );
+                            return (
+                              <div className="relative flex items-center justify-between">
+                                <div className="absolute top-5 left-0 right-0 h-0.5 bg-gray-200">
+                                  <div
+                                    className="h-full bg-blue-600 transition-all duration-300"
+                                    style={{
+                                      width:
+                                        currentStep === 1
+                                          ? "0%"
+                                          : `${
+                                              ((currentStep - 1) /
+                                                (getProgressSteps().length -
+                                                  1)) *
+                                              100
+                                            }%`,
+                                    }}
+                                  />
+                                </div>
+
+                                {getProgressSteps().map((stepItem) => {
+                                  const isCompleted =
+                                    currentStep > stepItem.step;
+                                  const isCurrent =
+                                    currentStep === stepItem.step;
+                                  const isActive =
+                                    currentStep >= stepItem.step;
+
+                                  return (
                                     <div
-                                      className="h-full bg-blue-600 transition-all duration-300"
-                                      style={{
-                                        width:
-                                          currentStep === 1
-                                            ? "0%"
-                                            : `${
-                                                ((currentStep - 1) /
-                                                  (getProgressSteps().length -
-                                                    1)) *
-                                                100
-                                              }%`,
-                                      }}
-                                    />
-                                  </div>
-
-                                  {getProgressSteps().map((stepItem) => {
-                                    const isCompleted =
-                                      currentStep > stepItem.step;
-                                    const isCurrent =
-                                      currentStep === stepItem.step;
-                                    const isActive =
-                                      currentStep >= stepItem.step;
-
-                                    return (
+                                      key={stepItem.step}
+                                      className="flex flex-col items-center relative z-10 flex-1"
+                                    >
                                       <div
-                                        key={stepItem.step}
-                                        className="flex flex-col items-center relative z-10 flex-1"
+                                        className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-300 ${
+                                          isCompleted
+                                            ? "bg-blue-600 text-white shadow-md"
+                                            : isCurrent
+                                            ? "bg-blue-100 text-blue-600 border-2 border-blue-600 shadow-sm"
+                                            : "bg-gray-200 text-gray-500"
+                                        }`}
                                       >
-                                        <div
-                                          className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-300 ${
-                                            isCompleted
-                                              ? "bg-blue-600 text-white shadow-md"
-                                              : isCurrent
-                                              ? "bg-blue-100 text-blue-600 border-2 border-blue-600 shadow-sm"
-                                              : "bg-gray-200 text-gray-500"
-                                          }`}
-                                        >
-                                          {isCompleted ? (
-                                            <CheckCircle className="h-5 w-5" />
-                                          ) : isCurrent ? (
-                                            <Clock className="h-5 w-5" />
-                                          ) : (
-                                            stepItem.step
-                                          )}
-                                        </div>
-                                        <span
-                                          className={`mt-2 text-xs text-center px-1 ${
-                                            isActive
-                                              ? "text-gray-900 font-medium"
-                                              : "text-gray-500"
-                                          }`}
-                                        >
-                                          {stepItem.label}
-                                        </span>
+                                        {isCompleted ? (
+                                          <CheckCircle className="h-5 w-5" />
+                                        ) : isCurrent ? (
+                                          <Clock className="h-5 w-5" />
+                                        ) : (
+                                          stepItem.step
+                                        )}
                                       </div>
-                                    );
-                                  })}
-                                </div>
-                              );
-                            })()}
+                                      <span
+                                        className={`mt-2 text-xs text-center px-1 ${
+                                          isActive
+                                            ? "text-gray-900 font-medium"
+                                            : "text-gray-500"
+                                        }`}
+                                      >
+                                        {stepItem.label}
+                                      </span>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            );
+                          })()}
+                        </div>
+                      </div>
+
+                      {/* Application Details */}
+                      <div className="mt-4 pt-4 border-t">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <span className="text-gray-600">Ngày nộp:</span>
+                            <span className="ml-2 font-medium">
+                              {app.appliedAt || app.appliedDate
+                                ? formatDate(
+                                    app.appliedAt || app.appliedDate!
+                                  )
+                                : "N/A"}
+                            </span>
                           </div>
+                          {app.job && (
+                            <div>
+                              <span className="text-gray-600">Vị trí:</span>
+                              <Link
+                                href={`/jobs/${
+                                  app.job.slug || app.job.jobPostingId
+                                }`}
+                                className="ml-2 font-medium text-blue-600 hover:underline inline-flex items-center gap-1"
+                              >
+                                {app.job.title}
+                                <ExternalLink className="h-3 w-3" />
+                              </Link>
+                            </div>
+                          )}
                         </div>
 
-                        {/* Application Details */}
-                        <div className="mt-4 pt-4 border-t">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                            <div>
-                              <span className="text-gray-600">Ngày nộp:</span>
-                              <span className="ml-2 font-medium">
-                                {app.appliedAt || app.appliedDate
-                                  ? formatDate(
-                                      app.appliedAt || app.appliedDate!
-                                    )
-                                  : "N/A"}
-                              </span>
-                            </div>
-                            {app.job && (
-                              <div>
-                                <span className="text-gray-600">Vị trí:</span>
-                                <Link
-                                  href={`/jobs/${
-                                    app.job.slug || app.job.jobPostingId
-                                  }`}
-                                  className="ml-2 font-medium text-blue-600 hover:underline inline-flex items-center gap-1"
-                                >
-                                  {app.job.title}
-                                  <ExternalLink className="h-3 w-3" />
-                                </Link>
-                              </div>
-                            )}
-                          </div>
+                        {/* Additional Information Section */}
+                        {(app.resumeUrl ||
+                          app.coverLetter ||
+                          app.screeningScore !== undefined) && (
+                          <div className="mt-4 pt-4 border-t">
+                            <button
+                              onClick={() =>
+                                toggleSection(app.applicationId || 0)
+                              }
+                              className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+                            >
+                              <span>Thông tin chi tiết</span>
+                              {isExpanded ? (
+                                <ChevronUp className="h-4 w-4" />
+                              ) : (
+                                <ChevronDown className="h-4 w-4" />
+                              )}
+                            </button>
 
-                          {/* Additional Information Section */}
-                          {(app.resumeUrl ||
-                            app.coverLetter ||
-                            app.screeningScore !== undefined) && (
-                            <div className="mt-4 pt-4 border-t">
-                              <button
-                                onClick={() =>
-                                  toggleSection(app.applicationId || 0)
-                                }
-                                className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
-                              >
-                                <span>Thông tin chi tiết</span>
-                                {isExpanded ? (
-                                  <ChevronUp className="h-4 w-4" />
-                                ) : (
-                                  <ChevronDown className="h-4 w-4" />
+                            {isExpanded && (
+                              <div className="mt-4 space-y-4">
+                                {app.resumeUrl && (
+                                  <div>
+                                    <label className="text-xs font-medium text-gray-600 block mb-1">
+                                      CV/Resume
+                                    </label>
+                                    <a
+                                      href={app.resumeUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 hover:underline"
+                                    >
+                                      <Download className="h-4 w-4" />
+                                      Tải xuống CV
+                                    </a>
+                                  </div>
                                 )}
-                              </button>
 
-                              {isExpanded && (
-                                <div className="mt-4 space-y-4">
-                                  {app.resumeUrl && (
+                                {app.coverLetter && (
+                                  <div>
+                                    <label className="text-xs font-medium text-gray-600 block mb-2">
+                                      Thư xin việc
+                                    </label>
+                                    <div className="p-3 bg-gray-50 rounded-md border text-sm text-gray-700 whitespace-pre-wrap max-h-48 overflow-y-auto">
+                                      {app.coverLetter}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {app.screeningScore !== undefined &&
+                                  app.screeningScore !== null && (
                                     <div>
                                       <label className="text-xs font-medium text-gray-600 block mb-1">
-                                        CV/Resume
+                                        Điểm sàng lọc CV
                                       </label>
-                                      <a
-                                        href={app.resumeUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 hover:underline"
-                                      >
-                                        <Download className="h-4 w-4" />
-                                        Tải xuống CV
-                                      </a>
-                                    </div>
-                                  )}
-
-                                  {app.coverLetter && (
-                                    <div>
-                                      <label className="text-xs font-medium text-gray-600 block mb-2">
-                                        Thư xin việc
-                                      </label>
-                                      <div className="p-3 bg-gray-50 rounded-md border text-sm text-gray-700 whitespace-pre-wrap max-h-48 overflow-y-auto">
-                                        {app.coverLetter}
-                                      </div>
-                                    </div>
-                                  )}
-
-                                  {app.screeningScore !== undefined &&
-                                    app.screeningScore !== null && (
-                                      <div>
-                                        <label className="text-xs font-medium text-gray-600 block mb-1">
-                                          Điểm sàng lọc CV
-                                        </label>
-                                        <div className="flex items-center gap-2">
-                                          <div className="flex-1 bg-gray-200 rounded-full h-2">
-                                            <div
-                                              className={`h-2 rounded-full ${
-                                                app.screeningScore >= 70
-                                                  ? "bg-green-600"
-                                                  : app.screeningScore >= 50
-                                                  ? "bg-yellow-600"
-                                                  : "bg-red-600"
-                                              }`}
-                                              style={{
-                                                width: `${app.screeningScore}%`,
-                                              }}
-                                            />
-                                          </div>
-                                          <span className="text-sm font-medium text-gray-700">
-                                            {app.screeningScore.toFixed(1)}/100
-                                          </span>
+                                      <div className="flex items-center gap-2">
+                                        <div className="flex-1 bg-gray-200 rounded-full h-2">
+                                          <div
+                                            className={`h-2 rounded-full ${
+                                              Number(app.screeningScore) >= 70
+                                                ? "bg-green-600"
+                                                : Number(app.screeningScore) >= 50
+                                                ? "bg-yellow-600"
+                                                : "bg-red-600"
+                                            }`}
+                                            style={{
+                                              width: `${Number(app.screeningScore)}%`,
+                                            }}
+                                          />
+                                        </div>
+                                        <span className="text-sm font-medium text-gray-700">
+                                          {Number(app.screeningScore).toFixed(1)}/100
+                                        </span>
                                         </div>
                                       </div>
                                     )}
