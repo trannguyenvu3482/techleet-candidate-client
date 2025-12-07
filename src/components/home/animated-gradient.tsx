@@ -1,8 +1,8 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, HTMLMotionProps } from "framer-motion";
 
-interface AnimatedGradientProps {
+interface AnimatedGradientProps extends HTMLMotionProps<"div"> {
   children: React.ReactNode;
   className?: string;
   lightGradient?: string;
@@ -14,6 +14,7 @@ export function AnimatedGradient({
   className = "",
   lightGradient = "from-blue-50 via-indigo-100 to-purple-50",
   darkGradient = "from-blue-950 via-indigo-950 to-purple-950",
+  ...props
 }: AnimatedGradientProps) {
   return (
     <motion.div
@@ -30,6 +31,7 @@ export function AnimatedGradient({
       style={{
         backgroundSize: "200% 200%",
       }}
+      {...props}
     >
       {children}
     </motion.div>

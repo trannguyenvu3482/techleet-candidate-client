@@ -1,14 +1,55 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState, MouseEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { AnimatedGradient } from "./animated-gradient";
 
 export function HeroSection() {
+  const [displayedText, setDisplayedText] = useState("");
+  const fullText = "công nghệ";
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  useEffect(() => {
+    let currentIndex = 0;
+    const intervalId = setInterval(() => {
+      if (currentIndex <= fullText.length) {
+        setDisplayedText(fullText.slice(0, currentIndex));
+        currentIndex++;
+      } else {
+        clearInterval(intervalId);
+      }
+    }, 150);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
+  function handleMouseMove({ currentTarget, clientX, clientY }: MouseEvent) {
+    const { left, top } = currentTarget.getBoundingClientRect();
+    mouseX.set(clientX - left);
+    mouseY.set(clientY - top);
+  }
+
   return (
-    <AnimatedGradient className="py-20 relative overflow-hidden">
+    <AnimatedGradient className="py-20 relative overflow-hidden min-h-[600px] flex items-center justify-center" onMouseMove={handleMouseMove}>
+      {/* Mouse following spotlight */}
+      <motion.div
+        className="pointer-events-none absolute -inset-px opacity-0 transition duration-300 group-hover:opacity-100"
+        style={{
+          background: useMotionTemplate`
+            radial-gradient(
+              650px circle at ${mouseX}px ${mouseY}px,
+              rgba(59, 130, 246, 0.15),
+              transparent 80%
+            )
+          `,
+        }}
+        animate={{ opacity: 1 }}
+      />
+      
       {/* Floating particles */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {[...Array(6)].map((_, i) => {
@@ -43,10 +84,17 @@ export function HeroSection() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
-          className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6"
+          className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6 h-[80px]"
         >
-          Xây dựng tương lai
-          <span className="text-blue-600 dark:text-blue-400"> công nghệ</span>
+          Xây dựng tương lai{" "}
+          <span className="text-blue-600 dark:text-blue-400 inline-block min-w-[200px]">
+            {displayedText}
+            <motion.span
+              animate={{ opacity: [0, 1, 0] }}
+              transition={{ repeat: Infinity, duration: 0.8 }}
+              className="inline-block w-[2px] h-[1em] bg-blue-600 dark:bg-blue-400 ml-1 align-middle"
+            />
+          </span>
         </motion.h1>
         <motion.p
           initial={{ opacity: 0, y: -20 }}

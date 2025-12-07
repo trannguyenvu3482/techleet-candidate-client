@@ -424,28 +424,28 @@ export function JobApplicationForm({ job }: JobApplicationFormProps) {
 
   if (submitted) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-8">
-        <div className="max-w-lg mx-auto text-center bg-white rounded-lg shadow-sm border p-6 sm:p-8">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-black px-4 py-8">
+        <div className="max-w-lg mx-auto text-center bg-white dark:bg-zinc-900 rounded-lg shadow-sm border dark:border-zinc-800 p-6 sm:p-8">
           <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-6" />
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
             Ứng tuyển thành công!
           </h1>
-          <p className="text-gray-600 mb-4">
+          <p className="text-gray-600 dark:text-gray-400 mb-4">
             Cảm ơn bạn đã ứng tuyển vào vị trí <strong className="text-blue-600">{job.title}</strong>. 
             Chúng tôi sẽ xem xét hồ sơ và liên hệ với bạn trong thời gian sớm nhất.
           </p>
           {applicationId && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-              <p className="text-sm text-blue-800 mb-1">Mã đơn ứng tuyển:</p>
-              <p className="text-lg font-semibold text-blue-900">#{applicationId}</p>
-              <p className="text-xs text-blue-600 mt-2">
+            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
+              <p className="text-sm text-blue-800 dark:text-blue-300 mb-1">Mã đơn ứng tuyển:</p>
+              <p className="text-lg font-semibold text-blue-900 dark:text-blue-100">#{applicationId}</p>
+              <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">
                 Vui lòng lưu mã này để theo dõi trạng thái đơn ứng tuyển
               </p>
             </div>
           )}
-          <div className="bg-gray-50 rounded-lg p-4 mb-6 text-left">
-            <h3 className="font-semibold text-gray-900 mb-3 text-sm">Các bước tiếp theo:</h3>
-            <ul className="text-sm text-gray-600 space-y-2">
+          <div className="bg-gray-50 dark:bg-zinc-800/50 rounded-lg p-4 mb-6 text-left">
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-3 text-sm">Các bước tiếp theo:</h3>
+            <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-2">
               <li className="flex items-start">
                 <span className="text-green-500 mr-2">✓</span>
                 <span>Chúng tôi sẽ xem xét hồ sơ của bạn trong vòng 5-7 ngày làm việc</span>
@@ -478,18 +478,18 @@ export function JobApplicationForm({ job }: JobApplicationFormProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-black">
       {/* Breadcrumb */}
-      <div className="bg-white border-b">
+      <div className="bg-white dark:bg-zinc-900 border-b dark:border-zinc-800">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center space-x-2 text-sm text-gray-600">
-            <Link href="/" className="hover:text-blue-600">Trang chủ</Link>
+          <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+            <Link href="/" className="hover:text-blue-600 dark:hover:text-blue-400">Trang chủ</Link>
             <span>/</span>
-            <Link href="/jobs" className="hover:text-blue-600">Việc làm</Link>
+            <Link href="/jobs" className="hover:text-blue-600 dark:hover:text-blue-400">Việc làm</Link>
             <span>/</span>
-            <Link href={`/jobs/${job.slug}`} className="hover:text-blue-600">{job.title}</Link>
+            <Link href={`/jobs/${job.slug}`} className="hover:text-blue-600 dark:hover:text-blue-400">{job.title}</Link>
             <span>/</span>
-            <span className="text-gray-900">Ứng tuyển</span>
+            <span className="text-gray-900 dark:text-white">Ứng tuyển</span>
           </div>
         </div>
       </div>
@@ -505,18 +505,18 @@ export function JobApplicationForm({ job }: JobApplicationFormProps) {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
             {/* Application Form */}
             <div className="lg:col-span-2 order-1 lg:order-1">
-              <div className="bg-white rounded-lg shadow-sm border p-4 sm:p-6 lg:p-8">
-                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">
+              <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-sm border dark:border-zinc-800 p-4 sm:p-6 lg:p-8">
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">
                   <span className="block sm:inline">Ứng tuyển vào vị trí:</span>
-                  <span className="block sm:inline sm:ml-1 text-blue-600">{job.title}</span>
+                  <span className="block sm:inline sm:ml-1 text-blue-600 dark:text-blue-400">{job.title}</span>
                 </h1>
 
                 {/* Draft indicator */}
                 {hasDraft && (
-                  <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
+                  <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-blue-600" />
-                      <span className="text-sm text-blue-800">
+                      <Clock className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                      <span className="text-sm text-blue-800 dark:text-blue-300">
                         Bạn có bản nháp đã lưu. Dữ liệu sẽ được tự động lưu khi bạn điền form.
                       </span>
                     </div>
@@ -530,7 +530,7 @@ export function JobApplicationForm({ job }: JobApplicationFormProps) {
                           form.reset();
                         }
                       }}
-                      className="text-blue-600 hover:text-blue-700"
+                      className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
                     >
                       Xóa nháp
                     </Button>
@@ -563,7 +563,7 @@ export function JobApplicationForm({ job }: JobApplicationFormProps) {
                           </button>
                           <div className="mt-2 text-center hidden sm:block">
                             <p className={`text-xs font-medium ${
-                              currentStep === step.id ? 'text-blue-600' : 'text-gray-500'
+                              currentStep === step.id ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'
                             }`}>
                               {step.name}
                             </p>
@@ -578,7 +578,7 @@ export function JobApplicationForm({ job }: JobApplicationFormProps) {
                     ))}
                   </div>
                   <div className="text-center">
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
                       Bước {currentStep} / {TOTAL_STEPS}: {steps[currentStep - 1].description}
                     </p>
                   </div>
@@ -589,7 +589,7 @@ export function JobApplicationForm({ job }: JobApplicationFormProps) {
                     {/* Step 1: Personal Information */}
                     {currentStep === 1 && (
                       <div>
-                        <h2 className="text-lg font-semibold text-gray-900 mb-4" id="personal-info">
+                        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4" id="personal-info">
                           Thông tin cá nhân
                         </h2>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -703,7 +703,7 @@ export function JobApplicationForm({ job }: JobApplicationFormProps) {
                     {/* Step 2: Professional Information */}
                     {currentStep === 2 && (
                       <div id="professional-info">
-                        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                           Thông tin nghề nghiệp
                         </h2>
                       
