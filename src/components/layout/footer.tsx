@@ -33,11 +33,6 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/news" className="hover:text-white transition-colors">
-                  Tin tức
-                </Link>
-              </li>
-              <li>
                 <Link href="/leadership" className="hover:text-white transition-colors">
                   Ban lãnh đạo
                 </Link>
@@ -52,11 +47,6 @@ export function Footer() {
               <li>
                 <Link href="/jobs" className="hover:text-white transition-colors">
                   Việc làm
-                </Link>
-              </li>
-              <li>
-                <Link href="/internship" className="hover:text-white transition-colors">
-                  Thực tập
                 </Link>
               </li>
               <li>

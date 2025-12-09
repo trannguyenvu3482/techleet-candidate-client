@@ -36,7 +36,9 @@ export function FeaturedJobsSection({ jobs }: FeaturedJobsSectionProps) {
                   whileHover={{ y: -8 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <JobCard job={job} />
+                  <Link href={`/jobs/${job.slug || job.jobPostingId}`} className="block h-full">
+                    <JobCard job={job} />
+                  </Link>
                 </motion.div>
               </ScrollReveal>
             ))

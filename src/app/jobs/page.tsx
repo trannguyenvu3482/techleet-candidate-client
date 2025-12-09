@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { JobCard } from "@/components/jobs/job-card";
 import { JobFilters } from "@/components/jobs/job-filters";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { Search, Filter, SlidersHorizontal } from "lucide-react";
+import { Search, Filter, SlidersHorizontal, Briefcase } from "lucide-react";
 import { api, ApiError } from "@/lib/api";
 import type { JobPosting } from "@/lib/api";
 import { generateJobSlug } from "@/lib/utils";
@@ -41,7 +41,6 @@ export default function JobsPage() {
   // Set page title (client component approach)
   useEffect(() => {
     document.title = "Tìm việc làm - TechLeet";
-    document.title = "Jobs | TechLeet Careers";
 
     return () => {
       document.title = "TechLeet";
@@ -126,44 +125,46 @@ export default function JobsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Page Header */}
-      <div className="bg-white border-b">
-        <div className="container mx-auto px-4 py-8">
-          <div className="max-w-4xl mx-auto">
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">
+      <div className="bg-card border-b">
+        <div className="container mx-auto px-4 py-12">
+          <div className="max-w-4xl mx-auto text-center space-y-4">
+            <h1 className="text-4xl font-bold text-foreground">
               Cơ hội nghề nghiệp tại TechLeet
             </h1>
-            <p className="text-gray-600 mb-6">
+            <p className="text-lg text-muted-foreground">
               Khám phá {jobs.length > 0 ? `${jobs.length}+` : ''} vị trí công việc hấp dẫn 
               và bắt đầu hành trình phát triển sự nghiệp của bạn.
             </p>
 
             {/* Search Bar */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                <Input
-                  type="text"
-                  placeholder="Tìm kiếm theo vị trí, kỹ năng, công ty..."
-                  value={filters.search}
-                  onChange={(e) => handleSearch(e.target.value)}
-                  className="pl-10 h-12"
-                />
+            <div className="max-w-2xl mx-auto pt-6">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1 relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+                  <Input
+                    type="text"
+                    placeholder="Tìm kiếm theo vị trí, kỹ năng, công ty..."
+                    value={filters.search}
+                    onChange={(e) => handleSearch(e.target.value)}
+                    className="pl-10 h-12 bg-background"
+                  />
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="h-12 px-6"
+                >
+                  <SlidersHorizontal className="mr-2 h-5 w-5" />
+                  Bộ lọc
+                  {Object.values(filters).some(v => v !== "") && (
+                    <span className="ml-2 bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full">
+                      {Object.values(filters).filter(v => v !== "").length}
+                    </span>
+                  )}
+                </Button>
               </div>
-              <Button
-                variant="outline"
-                onClick={() => setShowFilters(!showFilters)}
-                className="h-12 px-6"
-              >
-                <SlidersHorizontal className="mr-2 h-5 w-5" />
-                Bộ lọc
-                {Object.values(filters).some(v => v !== "") && (
-                  <span className="ml-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full">
-                    {Object.values(filters).filter(v => v !== "").length}
-                  </span>
-                )}
-              </Button>
             </div>
           </div>
         </div>
@@ -175,46 +176,50 @@ export default function JobsPage() {
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Filters Sidebar */}
             <div className={`lg:w-80 ${showFilters ? 'block' : 'hidden lg:block'}`}>
-              <JobFilters
-                filters={filters}
-                onFilterChange={handleFilterChange}
-                onClearFilters={clearFilters}
-              />
+              <div className="sticky top-24">
+                 <JobFilters
+                  filters={filters}
+                  onFilterChange={handleFilterChange}
+                  onClearFilters={clearFilters}
+                />
+              </div>
             </div>
 
             {/* Jobs Grid */}
             <div className="flex-1">
               {loading ? (
-                <div className="flex justify-center items-center py-12">
+                <div className="flex justify-center items-center py-20">
                   <LoadingSpinner size="lg" />
                 </div>
               ) : error ? (
-                <div className="text-center py-12">
-                  <div className="text-red-600 mb-4">{error}</div>
-                  <Button onClick={() => fetchJobs(filters)}>
+                <div className="text-center py-20 bg-card rounded-xl border shadow-sm">
+                  <div className="text-destructive mb-4 text-lg font-medium">{error}</div>
+                  <Button onClick={() => fetchJobs(filters)} variant="outline">
                     Thử lại
                   </Button>
                 </div>
               ) : jobs.length === 0 ? (
-                <div className="text-center py-12">
-                  <Filter className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                <div className="text-center py-20 bg-card rounded-xl border shadow-sm">
+                  <div className="bg-muted w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                     <Filter className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-foreground mb-2">
                     Không tìm thấy việc làm phù hợp
                   </h3>
-                  <p className="text-gray-600 mb-4">
-                    Thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm của bạn.
+                  <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
+                    Thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm của bạn để tìm thấy nhiều kết quả hơn.
                   </p>
-                  <Button onClick={clearFilters} variant="outline">
+                  <Button onClick={clearFilters} variant="secondary">
                     Xóa tất cả bộ lọc
                   </Button>
                 </div>
               ) : (
                 <>
                   {/* Results Count */}
-                  <div className="mb-6">
-                    <p className="text-gray-600">
-                      Hiển thị {jobs.length} việc làm
-                      {filters.search && ` cho "${filters.search}"`}
+                  <div className="mb-6 flex items-center justify-between">
+                    <p className="text-muted-foreground">
+                      Hiển thị <span className="font-medium text-foreground">{jobs.length}</span> việc làm
+                      {filters.search && <span className="text-muted-foreground"> cho "{filters.search}"</span>}
                     </p>
                   </div>
 
@@ -233,3 +238,4 @@ export default function JobsPage() {
     </div>
   );
 }
+

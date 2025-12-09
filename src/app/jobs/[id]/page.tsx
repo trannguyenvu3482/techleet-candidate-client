@@ -297,23 +297,9 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
                 </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex flex-col gap-3 lg:w-48">
-                <Button asChild size="lg" className="w-full">
-                  <Link href={`/jobs/${job.slug}/apply`}>
-                    Ứng tuyển ngay
-                  </Link>
-                </Button>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" className="flex-1">
-                    <Bookmark className="h-4 w-4 mr-1" />
-                    Lưu
-                  </Button>
-                  <Button variant="outline" size="sm" className="flex-1">
-                    <Share2 className="h-4 w-4 mr-1" />
-                    Chia sẻ
-                  </Button>
-                </div>
+              {/* Action Buttons - Removed as per Ticket 3 (Redundant/Unimplemented) */}
+              <div className="hidden lg:block lg:w-48">
+                {/* Space reserved for layout alignment if needed, or remove completely */}
               </div>
             </div>
 
