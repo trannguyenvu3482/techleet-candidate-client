@@ -70,11 +70,20 @@ export default function JobsPage() {
       // Use real API - fetches all jobs
       const allJobs = await api.getJobPostings(params);
 
-      // Generate slugs for jobs that don't have them
-      const jobsWithSlugs = allJobs.map(job => ({
-        ...job,
-        slug: job.slug || generateJobSlug(job.title, job.jobPostingId)
-      }));
+      // Generate slugs for jobs that don't have them and filter expired jobs
+      const jobsWithSlugs = allJobs
+        .filter(job => {
+          if (!job.applicationDeadline) return true;
+          const deadline = new Date(job.applicationDeadline);
+          const now = new Date();
+          // Reset time to compare dates only, or allow until end of deadline day
+          deadline.setHours(23, 59, 59, 999);
+          return deadline >= now;
+        })
+        .map(job => ({
+          ...job,
+          slug: job.slug || generateJobSlug(job.title, job.jobPostingId)
+        }));
 
       setJobs(jobsWithSlugs);
       

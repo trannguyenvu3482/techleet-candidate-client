@@ -26,7 +26,18 @@ export default async function Home() {
     const jobs = await api.getJobPostings({ 
       status: 'published', 
     });
-    featuredJobs = jobs.slice(0, 3).map(job => ({
+    
+    // Filter expired jobs matching logic in /jobs page
+    const activeJobs = jobs.filter(job => {
+      if (!job.applicationDeadline) return true;
+      const deadline = new Date(job.applicationDeadline);
+      const now = new Date();
+      // Reset time to compare dates only, or allow until end of deadline day
+      deadline.setHours(23, 59, 59, 999);
+      return deadline >= now;
+    });
+
+    featuredJobs = activeJobs.slice(0, 3).map(job => ({
       ...job,
       slug: job.slug || generateJobSlug(job.title, job.jobPostingId)
     }));

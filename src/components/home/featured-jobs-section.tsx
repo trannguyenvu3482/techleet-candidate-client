@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Briefcase } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { JobCard } from "@/components/jobs/job-card";
@@ -43,33 +43,20 @@ export function FeaturedJobsSection({ jobs }: FeaturedJobsSectionProps) {
               </ScrollReveal>
             ))
           ) : (
-            [1, 2, 3].map((i) => (
-              <motion.div
-                key={i}
-                className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: i * 0.1 }}
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
-                      Đang tải việc làm...
-                    </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">Vui lòng đợi</p>
-                  </div>
-                  <span className="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 text-xs px-2 py-1 rounded-full">
-                    Full-time
-                  </span>
+             <div className="col-span-full py-12 text-center bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+                <div className="bg-muted w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Briefcase className="h-8 w-8 text-muted-foreground" />
                 </div>
-                <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                  Đang tải thông tin việc làm...
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                  Chưa có việc làm nổi bật
+                </h3>
+                <p className="text-gray-600 dark:text-gray-300 mb-6 max-w-md mx-auto">
+                  Hiện tại chưa có việc làm nổi bật nào được hiển thị. Vui lòng quay lại sau hoặc xem tất cả việc làm.
                 </p>
-                <Button variant="outline" size="sm" className="w-full" disabled>
-                  Xem chi tiết
+                <Button asChild variant="outline">
+                  <Link href="/jobs">Xem tất cả việc làm</Link>
                 </Button>
-              </motion.div>
-            ))
+            </div>
           )}
         </div>
 
